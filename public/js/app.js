@@ -89,7 +89,7 @@
   function heroHTML() {
     const hs = S.hero || {};
     const slides = hs.slides && hs.slides.length ? hs.slides : [{ title: brand.name }];
-    return `<section class="hero" id="top" data-tone="dark">
+    return `<section class="hero" id="top">
       <div class="hero__frame"><div class="hero__media">
         ${slides.map((s, i) => `<div class="hero__slide${i ? '' : ' is-active'}"><img src="${url(s.image)}" alt="" ${i ? 'loading="lazy"' : 'fetchpriority="high"'}></div>`).join('')}
         <div class="hero__shade"></div>
@@ -196,9 +196,9 @@
     const pr = S.process || {};
     const steps = pr.steps || [];
     if (!steps.length) return '';
-    return `<section class="process tone-dark" id="quy-trinh" data-tone="dark">
+    return `<section class="process sec-mint" id="quy-trinh">
       <div class="container">
-        <header class="sec-head"><p class="eyebrow eyebrow--light" data-reveal>${h(pr.eyebrow)}</p><h2 class="h2" data-lines>${splitLines(pr.title)}</h2></header>
+        <header class="sec-head"><p class="eyebrow" data-reveal>${h(pr.eyebrow)}</p><h2 class="h2" data-lines>${splitLines(pr.title)}</h2></header>
         <div class="process__grid">
           <div class="process__visual">
             <div class="process__frame">${steps.map((s, i) => `<img class="process__img${i ? '' : ' is-active'}" src="${url(s.image)}" alt="" loading="lazy">`).join('')}</div>
@@ -227,10 +227,10 @@
   function orderHTML() {
     const o = S.order || {};
     const pr = S.promo || {};
-    return `<section class="order tone-dark" id="dat-hang" data-tone="dark">
+    return `<section class="order sec-peach" id="dat-hang">
       <div class="container order__grid">
         <div class="order__left">
-          <p class="eyebrow eyebrow--light" data-reveal>${h(o.eyebrow)}</p>
+          <p class="eyebrow" data-reveal>${h(o.eyebrow)}</p>
           <h2 class="h2" data-lines>${splitLines(o.title)}</h2>
           <p class="order__lead" data-reveal>${h(o.subtitle)}</p>
           ${pr.enabled ? `<div class="promo" data-reveal>
@@ -301,7 +301,7 @@
   function footerHTML() {
     const ft = S.footer || {};
     return `<div class="container footer__grid">
-        <div class="footer__about"><a href="#top" class="logo logo--light">${logoHTML()}</a><p>${h(ft.about)}</p></div>
+        <div class="footer__about"><a href="#top" class="logo">${logoHTML()}</a><p>${h(ft.about)}</p></div>
         <div><h4>Liên hệ</h4><ul>
           ${brand.phone ? `<li><a href="${tel(brand.phone)}">☎ ${h(brand.phone)}</a></li>` : ''}
           ${brand.email ? `<li><a href="mailto:${h(brand.email)}">✉ ${h(brand.email)}</a></li>` : ''}
@@ -314,9 +314,9 @@
         </ul></div>
         <div><h4>Đặt tranh ngay</h4>
           <div class="footer__btns">
-            ${brand.phone ? `<a class="btn btn--light btn--sm" href="${tel(brand.phone)}">Gọi ${h(brand.phone)}</a>` : ''}
-            ${brand.zalo ? `<a class="btn btn--ghost-light btn--sm" href="${zalo(brand.zalo)}" target="_blank" rel="noopener">Chat Zalo</a>` : ''}
-            ${url(brand.facebook) ? `<a class="btn btn--ghost-light btn--sm" href="${url(brand.facebook)}" target="_blank" rel="noopener">Facebook</a>` : ''}
+            ${brand.phone ? `<a class="btn btn--accent btn--sm" href="${tel(brand.phone)}">Gọi ${h(brand.phone)}</a>` : ''}
+            ${brand.zalo ? `<a class="btn btn--line btn--sm" href="${zalo(brand.zalo)}" target="_blank" rel="noopener">Chat Zalo</a>` : ''}
+            ${url(brand.facebook) ? `<a class="btn btn--line btn--sm" href="${url(brand.facebook)}" target="_blank" rel="noopener">Facebook</a>` : ''}
           </div>
         </div>
       </div>
@@ -336,7 +336,6 @@
 
     $('#main').innerHTML = heroHTML() + marqueeHTML() + introHTML() + featuredHTML() + catalogHTML() + spacesHTML() + processHTML() + featuresHTML() + orderHTML() + reviewsHTML() + faqHTML();
     $('#footer').innerHTML = footerHTML();
-    $('#footer').dataset.tone = 'dark';
 
     $('#floatContact').innerHTML = `
       ${brand.zalo ? `<a href="${zalo(brand.zalo)}" target="_blank" rel="noopener" class="fc fc--zalo" aria-label="Chat Zalo">Zalo</a>` : ''}
@@ -794,7 +793,7 @@
 
     // tiêu đề tách dòng trượt lên
     $$('[data-lines]').forEach((el) => {
-      gsap.from($$('.line__in', el), { yPercent: 110, rotate: 2, duration: 1.1, ease: 'expo.out', stagger: 0.09, scrollTrigger: { trigger: el, start: 'top 85%' } });
+      gsap.from($$('.line__in', el), { yPercent: 110, rotate: 2, duration: 1.1, ease: 'expo.out', stagger: 0.09, scrollTrigger: { trigger: el, start: 'top 85%', onEnter: () => el.classList.add('is-drawn') } });
     });
 
     // hiện dần các phần tử

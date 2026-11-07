@@ -481,6 +481,77 @@ html:not(.has-motion) .marquee__track { animation: mq 30s linear infinite; }
 .toast { position: fixed; left: 50%; bottom: 96px; z-index: 99; max-width: min(92vw, 520px); width: max-content; padding: 14px 22px; border-radius: 16px; background: var(--ink); color: var(--cream); font-size: .9rem; text-align: center; opacity: 0; transform: translate(-50%, 20px); pointer-events: none; transition: opacity .4s, transform .6s var(--ease); box-shadow: 0 20px 40px -16px rgba(0, 0, 0, .5); }
 .toast.is-show { opacity: 1; transform: translate(-50%, 0); }
 
+/* =========================================================
+   GIAO DIỆN SÁNG – NGHỆ THUẬT
+   ========================================================= */
+:root {
+  --bg: #fdf7ee; --bg-2: #f6eadb; --paper: #fffdf9; --ink: #2a2230; --muted: #7a6c66; --dark: #2a2230;
+  --sage: #b8d4b0; --rose: #f6c3b0; --sky: #bfe0ea; --lilac: #e6d3f0;
+}
+body::before { display: none; }
+
+/* các mảng màu loang trôi nhẹ phía sau trang */
+.blobs { position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
+.blobs i { position: absolute; width: 52vmax; height: 52vmax; border-radius: 50%; opacity: .6; animation: blob 26s ease-in-out infinite alternate; will-change: transform; }
+.blobs i:nth-child(1) { left: -14vmax; top: -12vmax; background: radial-gradient(circle, var(--rose), transparent 62%); }
+.blobs i:nth-child(2) { right: -16vmax; top: 22vh; background: radial-gradient(circle, var(--sky), transparent 62%); animation-duration: 32s; animation-delay: -8s; }
+.blobs i:nth-child(3) { left: 18vw; bottom: -24vmax; background: radial-gradient(circle, color-mix(in srgb, var(--ochre) 50%, #fff), transparent 62%); animation-duration: 29s; animation-delay: -14s; }
+.blobs i:nth-child(4) { right: 20vw; top: -22vmax; background: radial-gradient(circle, var(--lilac), transparent 62%); animation-duration: 35s; animation-delay: -4s; }
+@keyframes blob { 0% { transform: translate(0, 0) scale(1); } 50% { transform: translate(6vw, 8vh) scale(1.12); } 100% { transform: translate(-5vw, -4vh) scale(.94); } }
+
+/* nét bút dạ được tô dưới dòng chữ nghiêng của tiêu đề */
+.h2 .line:nth-child(2) .line__in {
+  padding: 0 .1em; margin: 0 -.1em;
+  background: linear-gradient(100deg, transparent 1%, color-mix(in srgb, var(--ochre) 50%, transparent) 4%, color-mix(in srgb, var(--rose) 75%, transparent) 95%, transparent 99%) no-repeat 0 86% / 100% .34em;
+  transition: background-size 1.3s var(--ease) .45s;
+}
+.has-motion .h2:not(.is-drawn) .line:nth-child(2) .line__in { background-size: 0% .34em; }
+
+/* nút sáng, có chuyển sắc */
+.btn--accent { background: linear-gradient(120deg, var(--accent), color-mix(in srgb, var(--accent) 55%, var(--ochre))); }
+.card:hover { box-shadow: 0 1px 0 var(--line), 0 36px 60px -28px color-mix(in srgb, var(--accent) 55%, transparent); }
+
+/* màn hình chờ sáng */
+.preloader { background: linear-gradient(135deg, #fde3d3, #fdf3dc 45%, #dff0ec); color: var(--ink); }
+.preloader__bar { background: rgba(42, 34, 48, .1); }
+
+/* banner: lớp phủ hoàng hôn thay cho màu đen */
+.hero__shade { background: linear-gradient(100deg, rgba(110, 47, 77, .66) 0%, rgba(196, 85, 58, .34) 45%, rgba(217, 162, 63, .04) 80%), linear-gradient(0deg, rgba(42, 34, 48, .32), transparent 38%); }
+
+/* quy trình: nền xanh bạc hà */
+.sec-mint { background: linear-gradient(180deg, #e2f3ee 0%, #edf6e8 55%, #fdf3e2 100%); }
+.process__frame { background: var(--bg-2); box-shadow: 0 40px 80px -40px rgba(47, 110, 106, .55); }
+.pstep p { opacity: 1; color: var(--muted); }
+.pstep__n { color: var(--teal); font-weight: 600; }
+.pstep.is-active h3 { color: var(--teal); }
+
+/* không gian: thẻ cuối màu tím nhạt thay vì tối */
+.space:nth-child(4n) { background: var(--lilac); color: var(--ink); }
+.space:nth-child(4n) .space__body p { color: var(--muted); }
+.space:nth-child(4n) .space__num { color: var(--plum); }
+
+/* đặt hàng: nền đào – hồng */
+.sec-peach { background: linear-gradient(160deg, #fde3d5 0%, #fdf0de 45%, #f3e2f2 100%); }
+.order__lead { opacity: 1; color: var(--muted); }
+.promo { border: 0; color: #fff; background: linear-gradient(135deg, var(--accent), var(--plum) 75%); box-shadow: 0 30px 60px -30px rgba(110, 47, 77, .6); }
+.promo__eyebrow { color: #ffd98c; }
+.promo > p { opacity: .92; }
+.countdown > div { background: rgba(255, 255, 255, .2); }
+.order__trust li::before { color: var(--teal); }
+.order__trust a { color: var(--accent); }
+.order__card { background: var(--paper); box-shadow: 0 40px 80px -40px rgba(110, 47, 77, .45), 0 0 0 1px rgba(255, 255, 255, .6) inset; }
+
+/* đánh giá: dải tím nhạt */
+.reviews { background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--lilac) 60%, transparent) 40%, transparent); }
+
+/* chân trang sáng, chữ lớn chuyển sắc */
+.footer { background: linear-gradient(160deg, #fde6d7 0%, #fdf2dc 45%, #e0f1ec 100%); color: var(--ink); }
+.footer__about p { opacity: 1; color: var(--muted); }
+.footer h4 { opacity: 1; color: var(--accent); font-weight: 600; }
+.footer ul a:hover { color: var(--accent); }
+.footer__big { background: linear-gradient(90deg, var(--ochre), var(--accent) 35%, var(--plum) 65%, var(--teal)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.footer__bottom { border-top-color: var(--line); opacity: 1; color: var(--muted); }
+
 /* ---------- responsive ---------- */
 @media (max-width: 1100px) {
   .header__phone { display: none; }
@@ -516,7 +587,7 @@ html:not(.has-motion) .marquee__track { animation: mq 30s linear infinite; }
   .space__body { padding: 26px; gap: 12px; }
   .process__grid { grid-template-columns: 1fr; gap: 0; }
   .process__visual { display: none; }
-  .pstep { min-height: 0; opacity: 1; padding: 28px 0; border-top: 1px solid rgba(255, 255, 255, .1); }
+  .pstep { min-height: 0; opacity: 1; padding: 28px 0; border-top: 1px solid var(--line); }
   .pstep__img { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 16px; margin-bottom: 22px; }
   .order__grid { grid-template-columns: 1fr; gap: 40px; }
   .order__left { position: static; }
