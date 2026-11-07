@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>%%TITLE%%</title>
+  <meta name="description" content="%%DESC%%">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="%%TITLE%%">
+  <meta property="og:description" content="%%DESC%%">
+  <meta property="og:image" content="%%OG%%">
+  <meta name="theme-color" content="#14110f">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2314110f'/%3E%3Crect x='14' y='12' width='36' height='40' rx='2' fill='none' stroke='%23d9a861' stroke-width='4'/%3E%3Cpath d='M18 46l10-14 7 9 5-6 6 11z' fill='%23d9a861'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <style>:root{--accent:%%ACCENT%%}</style>
+  <script>document.documentElement.classList.add('js');setTimeout(function(){document.documentElement.classList.add('is-loaded')},4000);</script>
+</head>
+<body>
+  <div class="preloader" id="preloader" aria-hidden="true">
+    <div class="preloader__brand" id="preloaderBrand"></div>
+    <div class="preloader__bar"><span></span></div>
+  </div>
+
+  <div class="cursor" id="cursor" aria-hidden="true"><span class="cursor__label"></span></div>
+
+  <div class="announce" id="announce"></div>
+  <header class="header" id="header">
+    <div class="container header__inner">
+      <a href="#top" class="logo" id="logo"></a>
+      <nav class="nav" id="nav" aria-label="Điều hướng chính">
+        <a href="#bo-suu-tap">Bộ sưu tập</a>
+        <a href="#khong-gian">Không gian</a>
+        <a href="#quy-trinh">Chất lượng</a>
+        <a href="#danh-gia">Đánh giá</a>
+        <a href="#dat-hang">Đặt hàng</a>
+      </nav>
+      <div class="header__actions">
+        <a class="header__phone" id="headerPhone" href="#"></a>
+        <button class="cart-btn" id="cartBtn" aria-label="Giỏ tranh">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 7h14l-1.2 12.2a1 1 0 0 1-1 .8H7.2a1 1 0 0 1-1-.8L5 7z"/><path d="M9 7V5a3 3 0 0 1 6 0v2"/></svg>
+          <span class="cart-btn__count" id="cartCount">0</span>
+        </button>
+        <a href="#dat-hang" class="btn btn--accent btn--sm header__cta">Đặt mua</a>
+        <button class="burger" id="burger" aria-label="Mở menu"><span></span><span></span></button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main"></main>
+
+  <footer class="footer tone-dark" id="footer"></footer>
+
+  <!-- Nút liên hệ nổi -->
+  <div class="float-contact" id="floatContact"></div>
+  <!-- Thanh đặt hàng trên mobile -->
+  <div class="mobile-bar" id="mobileBar"></div>
+
+  <!-- Modal chi tiết sản phẩm -->
+  <div class="modal" id="productModal" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal__backdrop" data-close></div>
+    <div class="modal__panel" id="productModalBody" data-lenis-prevent></div>
+  </div>
+
+  <!-- Giỏ tranh -->
+  <aside class="drawer" id="cartDrawer" aria-hidden="true">
+    <div class="drawer__backdrop" data-close></div>
+    <div class="drawer__panel">
+      <div class="drawer__head"><h3>Giỏ tranh của bạn</h3><button class="icon-btn" data-close aria-label="Đóng">✕</button></div>
+      <div class="drawer__body" id="cartBody" data-lenis-prevent></div>
+      <div class="drawer__foot" id="cartFoot"></div>
+    </div>
+  </aside>
+
+  <!-- Xem ảnh lớn -->
+  <div class="lightbox" id="lightbox" aria-hidden="true"><button class="icon-btn lightbox__close" data-close aria-label="Đóng">✕</button><img alt=""></div>
+
+  <div class="toast" id="toast" role="status"></div>
+
+  <script>window.__DATA__ = %%DATA%%;</script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js" defer></script>
+  <script src="/js/app.js" defer></script>
+</body>
+</html>

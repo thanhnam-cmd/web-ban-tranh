@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" width="800" height="1000" preserveAspectRatio="xMidYMid slice"><defs><filter id="ab"><feGaussianBlur stdDeviation="9.6"/></filter></defs>
+    <rect width="800" height="1000" fill="#3b2a26"/>
+    <g filter="url(#ab)">
+      <rect x="64" y="70" width="672" height="420" rx="8" fill="#c8643b" opacity=".92"/>
+      <rect x="64" y="530" width="672" height="120" rx="8" fill="#e8b25d" opacity=".9"/>
+      <rect x="64" y="690" width="672" height="240" rx="8" fill="#7a2f2a" opacity=".95"/>
+    </g>
+  <filter id="agr"><feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="2" stitchTiles="stitch"/>
+  <feColorMatrix values="0.33 0.33 0.33 0 0 0.33 0.33 0.33 0 0 0.33 0.33 0.33 0 0 0 0 0 0 0.12"/></filter>
+  <rect width="800" height="1000" filter="url(#agr)"/></svg>
