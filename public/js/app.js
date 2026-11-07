@@ -74,13 +74,14 @@
         ${p.badge ? `<span class="badge">${h(p.badge)}</span>` : ''}
         ${m && pct(m) ? `<span class="badge badge--sale">-${pct(m)}%</span>` : ''}
       </button>
-      <div class="card__info">
-        <div><span class="card__code">${h(p.code)}${p.category ? ' · ' + h(p.category) : ''}</span><h3 class="card__name">${h(p.name)}</h3></div>
-        <div class="card__price">${m ? `${pct(m) ? `<del>${money(m.price)}</del>` : ''}<strong><small>từ</small> ${money(priceOf(m))}</strong>` : '<strong>Liên hệ</strong>'}</div>
-      </div>
-      <div class="card__actions">
-        <button class="btn btn--line btn--sm" data-open="${h(p.id)}">Xem chi tiết</button>
-        <button class="btn btn--dark btn--sm" data-quick="${h(p.id)}">Đặt ngay</button>
+      <div class="card__body">
+        <span class="card__code">${h(p.code)}${p.category ? ' · ' + h(p.category) : ''}</span>
+        <h3 class="card__name">${h(p.name)}</h3>
+        <div class="card__price">${m ? `<small>Từ</small><strong>${money(priceOf(m))}</strong>${pct(m) ? `<del>${money(m.price)}</del>` : ''}` : '<strong>Liên hệ</strong>'}</div>
+        <div class="card__actions">
+          <button class="btn btn--line btn--sm" data-open="${h(p.id)}">Chi tiết</button>
+          <button class="btn btn--accent btn--sm" data-quick="${h(p.id)}">Đặt ngay</button>
+        </div>
       </div>
     </article>`;
   };
@@ -139,18 +140,27 @@
   function featuredHTML() {
     const c = S.collection || {};
     let list = P.filter((p) => p.featured);
-    if (!list.length) list = P.slice(0, 6);
-    return `<section class="featured" id="bo-suu-tap"><div class="featured__pin">
+    if (!list.length) list = P.slice(0, 8);
+    if (!list.length) return '';
+    let row = list;
+    while (row.length < 8) row = row.concat(list); // đủ dài để dải trôi liền mạch
+    const group = row.map((p) => cardHTML(p, 'card--feature')).join('');
+    return `<section class="featured" id="bo-suu-tap">
       <div class="container featured__head">
         <div><p class="eyebrow" data-reveal>${h(c.eyebrow)}</p><h2 class="h2" data-lines>${splitLines(c.title)}</h2></div>
-        <p class="featured__sub" data-reveal>${h(c.subtitle)}</p>
+        <div class="featured__aside" data-reveal>
+          <p class="featured__sub">${h(c.subtitle)}</p>
+          <div class="featured__ctrl">
+            <button class="arrow" data-belt="-1" aria-label="Tranh trước">←</button>
+            <button class="arrow" data-belt="1" aria-label="Tranh tiếp">→</button>
+            <a href="#tat-ca" class="link-arrow">Xem tất cả ${P.length} tác phẩm <span>→</span></a>
+          </div>
+        </div>
       </div>
-      <div class="featured__track">
-        ${list.map((p, i) => cardHTML(p, 'card--feature')).join('')}
-        <a href="#tat-ca" class="featured__more"><span>Xem tất cả</span><b>${P.length}</b><span>tác phẩm →</span></a>
+      <div class="belt" id="belt">
+        <div class="belt__track"><div class="belt__group">${group}</div><div class="belt__group" aria-hidden="true" inert>${group}</div></div>
       </div>
-      <div class="container"><div class="progress"><span></span></div></div>
-    </div></section>`;
+    </section>`;
   }
 
   function catalogHTML() {
@@ -645,6 +655,59 @@
     }
   }
 
+  /* ---------------- dải tranh trôi ngang (bộ sưu tập nổi bật) ---------------- */
+  function initBelt() {
+    const belt = $('#belt'); if (!belt) return;
+    const track = $('.belt__track', belt);
+    const group = $('.belt__group', belt);
+    const SPEED = isDesktop() ? 42 : 30; // px mỗi giây
+    let x = 0, half = 0, nudge = 0, hover = false, inView = true, drag = null, last = performance.now();
+    const measure = () => { half = group.offsetWidth; };
+    measure();
+    window.addEventListener('resize', measure);
+    window.addEventListener('load', measure);
+
+    // rê chuột: dừng lại để xem; rời chuột: chạy tiếp
+    belt.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') hover = true; });
+    belt.addEventListener('pointerleave', () => { hover = false; });
+
+    // kéo / vuốt bằng tay
+    belt.addEventListener('pointerdown', (e) => { drag = { sx: e.clientX, x0: x, moved: false }; });
+    window.addEventListener('pointermove', (e) => {
+      if (!drag) return;
+      const dx = e.clientX - drag.sx;
+      if (Math.abs(dx) > 6) { drag.moved = true; belt.classList.add('is-drag'); }
+      if (drag.moved) x = drag.x0 + dx;
+    }, { passive: true });
+    window.addEventListener('pointerup', () => {
+      if (drag && drag.moved) setTimeout(() => belt.classList.remove('is-drag'), 0);
+      setTimeout(() => { drag = null; }, 0);
+    });
+    belt.addEventListener('click', (e) => { if (drag && drag.moved) { e.preventDefault(); e.stopPropagation(); } }, true);
+
+    // nút mũi tên
+    $$('[data-belt]').forEach((b) => b.addEventListener('click', () => {
+      const card = $('.card', group);
+      const step = card ? card.offsetWidth + parseFloat(getComputedStyle(card).marginRight || 0) + 28 : 320;
+      nudge -= Number(b.dataset.belt) * step;
+    }));
+
+    if ('IntersectionObserver' in window) new IntersectionObserver(([en]) => { inView = en.isIntersecting; }).observe(belt);
+
+    const tick = (now) => {
+      const dt = Math.min(64, now - last) / 1000; last = now;
+      if (inView && half) {
+        if (!drag && !hover && !reduceMotion) x -= SPEED * dt;
+        if (Math.abs(nudge) > 0.5) { const s = nudge * 0.12; x += s; nudge -= s; } else nudge = 0;
+        while (x <= -half) { x += half; if (drag) drag.x0 += half; }
+        while (x > 0) { x -= half; if (drag) drag.x0 -= half; }
+        track.style.transform = `translate3d(${x.toFixed(2)}px,0,0)`;
+      }
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }
+
   /* ---------------- con trỏ tuỳ biến ---------------- */
   function initCursor() {
     if (!finePointer || reduceMotion) return;
@@ -765,23 +828,8 @@
       gsap.to(o, { v: end, duration: 2.2, ease: 'power2.out', scrollTrigger: { trigger: el, start: 'top 90%' }, onUpdate: () => { el.textContent = Math.round(o.v).toLocaleString('vi-VN') + suf; } });
     });
 
-    // bộ sưu tập nổi bật: cuộn ngang khi ghim màn hình (desktop)
-    mm.add('(min-width: 901px)', () => {
-      const track = $('.featured__track'); if (!track) return;
-      const dist = () => Math.max(0, track.scrollWidth - window.innerWidth);
-      const bar = $('.featured .progress span');
-      const tween = gsap.to(track, {
-        x: () => -dist(), ease: 'none',
-        scrollTrigger: {
-          trigger: '.featured', start: 'top top', end: () => '+=' + dist(), pin: true, scrub: 1, invalidateOnRefresh: true, anticipatePin: 1,
-          onUpdate: (self) => { if (bar) bar.style.transform = `scaleX(${self.progress})`; },
-        },
-      });
-      $$('.card--feature', track).forEach((card) => {
-        const img = $('img', card);
-        gsap.fromTo(img, { xPercent: -6, scale: 1.12 }, { xPercent: 6, scale: 1.12, ease: 'none', scrollTrigger: { trigger: card, containerAnimation: tween, start: 'left right', end: 'right left', scrub: true } });
-      });
-    });
+    // dải tranh nổi bật trượt nhẹ vào khi xuất hiện
+    gsap.from('.belt', { x: 120, autoAlpha: 0, duration: 1.4, ease: 'expo.out', scrollTrigger: { trigger: '.belt', start: 'top 90%' } });
 
     // không gian: các thẻ xếp chồng, thẻ trước lùi xa & tối dần
     const spaces = $$('.space');
@@ -818,6 +866,7 @@
   initOrder();
   initCountdown();
   initEvents();
+  initBelt();
   initCursor();
   initTilt();
   initMotion();

@@ -243,7 +243,7 @@ app.get('/', async (req, res, next) => {
       .replace(/%%TITLE%%/g, esc(site.seo.title || site.brand.name))
       .replace(/%%DESC%%/g, esc(site.seo.description))
       .replace(/%%OG%%/g, esc(abs(site.seo.ogImage)))
-      .replace(/%%ACCENT%%/g, esc(/^#[0-9a-f]{3,8}$/i.test(site.theme.accent) ? site.theme.accent : '#b07a3c'))
+      .replace(/%%ACCENT%%/g, esc(/^#[0-9a-f]{3,8}$/i.test(site.theme.accent) ? site.theme.accent : '#c4553a'))
       .replace('%%DATA%%', data);
     res.set('Cache-Control', 'no-cache');
     res.type('html').send(html);
