@@ -10,6 +10,8 @@ const IS_PROD = process.env.NODE_ENV === 'production';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
 const SECRET = process.env.SESSION_SECRET || crypto.createHash('sha256').update('mh-session:' + ADMIN_PASSWORD).digest('hex');
 const SESSION_DAYS = 7;
+// mã phiên bản để trình duyệt tải lại CSS/JS sau mỗi lần deploy
+const VERSION = String(process.env.RENDER_GIT_COMMIT || Date.now().toString(36)).slice(0, 10);
 
 const store = storeLib.create();
 const app = express();
@@ -244,12 +246,14 @@ app.get('/', async (req, res, next) => {
       .replace(/%%DESC%%/g, esc(site.seo.description))
       .replace(/%%OG%%/g, esc(abs(site.seo.ogImage)))
       .replace(/%%ACCENT%%/g, esc(/^#[0-9a-f]{3,8}$/i.test(site.theme.accent) ? site.theme.accent : '#c4553a'))
+      .replace(/%%VER%%/g, VERSION)
       .replace('%%DATA%%', data);
     res.set('Cache-Control', 'no-cache');
     res.type('html').send(html);
   } catch (e) { next(e); }
 });
-app.get(['/admin', '/admin/'], (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin', 'index.html')));
+const ADMIN_HTML = fs.readFileSync(path.join(__dirname, 'public', 'admin', 'index.html'), 'utf8').replace(/%%VER%%/g, VERSION);
+app.get(['/admin', '/admin/'], (req, res) => { res.set('Cache-Control', 'no-cache'); res.type('html').send(ADMIN_HTML); });
 app.use(express.static(path.join(__dirname, 'public'), { maxAge: IS_PROD ? '1d' : 0, index: false }));
 app.get('/healthz', (req, res) => res.send('ok'));
 
