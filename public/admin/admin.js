@@ -45,10 +45,10 @@
     fd.append('file', await compress(file));
     return (await api('/api/admin/upload', { method: 'POST', body: fd })).url;
   }
-  function pickFiles(multiple) {
+  function pickFiles(multiple, accept) {
     return new Promise((resolve) => {
       const i = document.createElement('input');
-      i.type = 'file'; i.accept = 'image/jpeg,image/png,image/webp,image/gif'; i.multiple = !!multiple;
+      i.type = 'file'; i.accept = accept || 'image/jpeg,image/png,image/webp,image/gif'; i.multiple = !!multiple;
       i.onchange = () => resolve(Array.from(i.files || []));
       i.click();
     });
@@ -279,6 +279,11 @@
           <div class="img-field__ctrl"><button type="button" class="b b--ghost b--sm" data-upload="${path}">⬆ Tải ảnh lên</button>
           <input data-path="${path}" value="${h(v)}" placeholder="hoặc dán đường dẫn ảnh…">${v ? `<button type="button" class="b b--text b--sm" data-clear="${path}">Xoá ảnh</button>` : ''}</div>
         </div>${hint}</div>`;
+      case 'audio': return `<div class="f f--wide"><span>${f.label}</span><div class="img-field__ctrl">
+          <input data-path="${path}" value="${h(v)}" placeholder="${h(f.ph || '')}">
+          <button type="button" class="b b--ghost b--sm" data-upload-audio="${path}">⬆ Tải file nhạc .mp3 lên</button>
+          ${v ? `<button type="button" class="b b--text b--sm" data-clear="${path}">Xoá link</button>` : ''}</div>
+          ${v && !/youtu/.test(v) ? `<audio controls preload="none" src="${h(v)}" style="width:100%;margin-top:8px"></audio>` : ''}${hint}</div>`;
       case 'images': {
         const arr = v || [];
         return `<div class="f f--wide"><span>${f.label}</span><div class="gallery">
@@ -329,6 +334,16 @@
         b.disabled = true; b.textContent = 'Đang tải…';
         try { setPath(root, d.upload, await uploadFile(file)); changed(); rerender(); toast('Đã tải ảnh lên', 'ok'); }
         catch (ex) { toast(ex.message, 'err'); b.disabled = false; b.textContent = '⬆ Tải ảnh lên'; }
+      }
+      else if (d.uploadAudio) {
+        const [file] = await pickFiles(false, 'audio/mpeg,audio/mp3,audio/mp4,audio/x-m4a,audio/aac,.mp3,.m4a'); if (!file) return;
+        if (file.size > 15 * 1024 * 1024) { toast('File nhạc tối đa 15MB', 'err'); return; }
+        b.disabled = true; b.textContent = 'Đang tải nhạc…';
+        try {
+          const fd = new FormData(); fd.append('file', file);
+          setPath(root, d.uploadAudio, (await api('/api/admin/upload-audio', { method: 'POST', body: fd })).url);
+          changed(); rerender(); toast('Đã tải nhạc lên – nhớ bấm Lưu', 'ok');
+        } catch (ex) { toast(ex.message, 'err'); b.disabled = false; b.textContent = '⬆ Tải file nhạc .mp3 lên'; }
       }
       else if (d.clear) { setPath(root, d.clear, ''); changed(); rerender(); }
       else if (d.imgAdd) {
@@ -402,8 +417,9 @@
         { k: 'poster', t: 'image', label: 'Ảnh bìa video (ngang 16:9 – để trống thì dùng ảnh của YouTube nếu có)' },
         T('eyebrow', 'Nhãn nhỏ'), TA('title', 'Tiêu đề (Enter để xuống dòng)', { rows: 2 }), TA('subtitle', 'Mô tả ngắn', { wide: true, rows: 2 }),
       ] },
-      { prefix: 'music', title: 'Nút bật nhạc xuân', desc: 'Dán link YouTube của bài nhạc (VD: https://www.youtube.com/watch?v=...) hoặc link file .mp3. Với link YouTube, khi khách bấm nút sẽ hiện một trình phát nhỏ ở góc màn hình (trên iPhone, nếu nhạc chưa tự phát, khách chạm ▶ trong khung đó). Để trống thì website tự chơi một giai điệu xuân nhẹ nhàng.', fields: [
-        { k: 'enabled', t: 'toggle', label: 'Hiển thị nút nhạc xuân' }, T('label', 'Chữ trên nút'), T('url', 'Link nhạc (YouTube hoặc .mp3)', { wide: true, ph: 'https://www.youtube.com/watch?v=...' }),
+      { prefix: 'music', title: 'Nút bật nhạc xuân', desc: 'Cách 1 (khuyên dùng, chạy trên MỌI máy kể cả iPhone/Safari): bấm “Tải file nhạc .mp3 lên” rồi Lưu. Cách 2: dán link YouTube – nhạc phát ẩn, không hiện khung video, nhưng Safari/iPhone không cho YouTube phát ẩn nên trên các máy đó website sẽ tự chơi giai điệu xuân dựng sẵn. Để trống: luôn chơi giai điệu xuân dựng sẵn.', fields: [
+        { k: 'enabled', t: 'toggle', label: 'Hiển thị nút nhạc xuân' }, T('label', 'Chữ trên nút'),
+        { k: 'url', t: 'audio', label: 'Bài nhạc (file .mp3 đã tải lên, hoặc link YouTube)', ph: 'https://www.youtube.com/watch?v=...  hoặc  link file .mp3', hint: 'Bạn cần có quyền sử dụng bài nhạc (mua bản quyền hoặc được tác giả cho phép).' },
       ] },
       { prefix: 'announcement', title: 'Thanh thông báo trên cùng', fields: [{ k: 'enabled', t: 'toggle', label: 'Hiển thị thanh thông báo' }, T('text', 'Nội dung', { wide: true })] },
       { prefix: 'promo', title: 'Ưu đãi & đồng hồ đếm ngược', desc: 'Để trống ngày kết thúc để đồng hồ tự đếm đến hết ngày hôm nay (ưu đãi trong ngày).', fields: [

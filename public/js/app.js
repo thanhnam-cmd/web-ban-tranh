@@ -852,29 +852,52 @@
       clearInterval(timer);
       if (master) master.gain.setTargetAtTime(0, ctx.currentTime, 0.3);
     }
-    // Link YouTube: mở trình phát nhỏ ở góc màn hình (iPhone chặn tự phát thì khách chạm ▶ trong khung)
+    // Link YouTube: phát ẩn (không hiện khung video). Safari/iPhone không cho YouTube phát ẩn
+    // -> trên Safari dùng giai điệu xuân dựng sẵn; muốn đúng bài trên mọi máy hãy tải file .mp3 trong Quản trị.
     const ytm = String(cfg.url || '').match(/(?:youtube\.com\/(?:watch\?v=|shorts\/|embed\/|live\/)|youtu\.be\/)([\w-]{11})/);
     const ytId = ytm && ytm[1];
-    let mini = null;
-    function startYT() {
-      mini = document.createElement('div');
-      mini.className = 'music-mini';
-      mini.innerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${ytId}?autoplay=1&loop=1&playlist=${ytId}&playsinline=1&rel=0" title="${h(cfg.label || 'Nhạc xuân')}" allow="autoplay; encrypted-media"></iframe>
-        <div class="music-mini__bar"><span>♪ ${h(cfg.label || 'Nhạc xuân')}</span><button type="button" aria-label="Tắt nhạc">✕</button></div>`;
-      document.body.appendChild(mini);
-      mini.querySelector('button').addEventListener('click', () => { if (playing) toggle(); });
+    const ua = navigator.userAgent;
+    const isSafari = /iP(hone|ad|od)/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1) || /^((?!chrome|chromium|crios|fxios|edg|android).)*safari/i.test(ua);
+    let yt = null, ytBox = null, ytReady = false;
+    function loadYTApi() {
+      return new Promise((resolve) => {
+        if (window.YT && window.YT.Player) return resolve();
+        const prev = window.onYouTubeIframeAPIReady;
+        window.onYouTubeIframeAPIReady = () => { if (prev) prev(); resolve(); };
+        if (!document.querySelector('script[src*="youtube.com/iframe_api"]')) {
+          const sc = document.createElement('script'); sc.src = 'https://www.youtube.com/iframe_api'; document.head.appendChild(sc);
+        }
+      });
     }
-    function stopYT() { if (mini) mini.remove(); mini = null; }
+    function startYT() {
+      if (yt && ytReady) { yt.playVideo(); return; }
+      if (yt) return;
+      ytBox = document.createElement('div');
+      ytBox.className = 'music-yt';
+      ytBox.setAttribute('aria-hidden', 'true');
+      ytBox.innerHTML = '<div id="musicYT"></div>';
+      document.body.appendChild(ytBox);
+      loadYTApi().then(() => {
+        yt = new window.YT.Player('musicYT', {
+          width: 200, height: 200, videoId: ytId, host: 'https://www.youtube-nocookie.com',
+          playerVars: { autoplay: 1, loop: 1, playlist: ytId, playsinline: 1, controls: 0, rel: 0 },
+          events: {
+            onReady: (e) => { ytReady = true; e.target.setVolume(60); if (playing) e.target.playVideo(); else e.target.pauseVideo(); },
+          },
+        });
+      });
+    }
+    function stopYT() { if (yt && ytReady) yt.pauseVideo(); }
     function toggle() {
       playing = !playing;
       try {
         if (navigator.audioSession) navigator.audioSession.type = 'playback'; // iPhone: phát cả khi bật chế độ im lặng
       } catch (e) { /* bỏ qua */ }
       try {
-        if (ytId) {
+        if (ytId && !isSafari) {
           if (playing) startYT(); else stopYT();
-        } else if (fileUrl) {
-          audio = audio || Object.assign(new Audio(fileUrl), { loop: true, volume: 0.5 });
+        } else if (fileUrl && !ytId) {
+          audio = audio || Object.assign(new Audio(fileUrl), { loop: true, volume: 0.6, preload: 'auto' });
           if (playing) audio.play().catch(() => { playing = false; update(); toast('Không phát được nhạc.'); }); else audio.pause();
         } else if (playing) startSynth(); else stopSynth();
       } catch (e) { playing = false; }

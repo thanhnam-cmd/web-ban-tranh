@@ -209,6 +209,16 @@ app.post('/api/admin/upload', requireAdmin, upload.single('file'), async (req, r
   res.json({ url: await store.saveImage(req.file.buffer, req.file.mimetype) });
 });
 
+const uploadAudio = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 15 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => cb(null, /^audio\/(mpeg|mp3|mp4|x-m4a|aac|ogg|wav|x-wav)$/.test(file.mimetype)),
+});
+app.post('/api/admin/upload-audio', requireAdmin, uploadAudio.single('file'), async (req, res) => {
+  if (!req.file) return res.status(400).json({ error: 'Chỉ chấp nhận file nhạc MP3, M4A, AAC, OGG, WAV (tối đa 15MB).' });
+  res.json({ url: await store.saveImage(req.file.buffer, req.file.mimetype) });
+});
+
 app.get('/api/admin/export', requireAdmin, async (req, res) => {
   res.set('Content-Disposition', `attachment; filename="backup-${new Date().toISOString().slice(0, 10)}.json"`);
   res.json({ site: await store.getSite(), products: await store.listProducts(), orders: await store.listOrders() });
@@ -225,9 +235,22 @@ app.use('/uploads', express.static(storeLib.UPLOAD_DIR, { maxAge: '30d', immutab
 app.get('/img/:id', async (req, res) => {
   const img = await store.getImage(req.params.id);
   if (!img) return res.status(404).end();
+  const buf = img.data.buffer ? Buffer.from(img.data.buffer) : img.data;
   res.set('Content-Type', img.mime);
   res.set('Cache-Control', 'public, max-age=31536000, immutable');
-  res.send(img.data.buffer ? Buffer.from(img.data.buffer) : img.data);
+  res.set('Accept-Ranges', 'bytes');
+  // Safari cần trả từng đoạn (Range) mới phát được file nhạc
+  const m = /^bytes=(\d*)-(\d*)$/.exec(req.headers.range || '');
+  if (m && (m[1] || m[2])) {
+    let start = m[1] ? +m[1] : buf.length - +m[2];
+    let end = m[1] && m[2] ? +m[2] : buf.length - 1;
+    if (start < 0) start = 0;
+    if (start >= buf.length || end < start) { res.set('Content-Range', `bytes */${buf.length}`); return res.status(416).end(); }
+    end = Math.min(end, buf.length - 1);
+    res.status(206).set('Content-Range', `bytes ${start}-${end}/${buf.length}`);
+    return res.send(buf.subarray(start, end + 1));
+  }
+  res.send(buf);
 });
 
 /* ---------------- trang ---------------- */
