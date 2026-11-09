@@ -411,9 +411,9 @@
     const sections = [
       { prefix: '', title: 'Các bộ sưu tập', desc: 'Mỗi bộ sưu tập hiển thị các sản phẩm có “Danh mục” trùng với ô Danh mục (VD: Mành Lịch Tết). Chưa có sản phẩm thì hiện lời mời nhắn Zalo.', fields: [
         { k: 'collections', t: 'list', label: 'Bộ sưu tập', item: 'Bộ sưu tập', fields: [
-          T('category', 'Danh mục sản phẩm (phải trùng với danh mục của sản phẩm)'), T('eyebrow', 'Nhãn nhỏ'),
+          T('category', 'Danh mục sản phẩm (phải trùng với danh mục của sản phẩm)'), T('navLabel', 'Chữ trên menu'), T('name', 'Tên dòng sản phẩm (VD: Mành In Tranh Lịch Tết)'), T('nameNote', 'Ghi chú tên (VD: Lịch treo tường độc đáo)'),
           TA('title', 'Tiêu đề (Enter để xuống dòng)', { rows: 2 }), TA('description', 'Mô tả', { wide: true, rows: 4 }),
-          { k: 'highlights', t: 'lines', label: 'Ý nghĩa / điểm nhấn' }, TA('emptyText', 'Lời nhắn khi chưa có sản phẩm', { wide: true, rows: 2 }),
+          T('highlightsTitle', 'Tiêu đề khối điểm nhấn'), { k: 'highlights', t: 'lines', label: 'Ý nghĩa / điểm nhấn (mỗi dòng một ý)' }, TA('emptyText', 'Lời nhắn khi chưa có sản phẩm', { wide: true, rows: 2 }),
         ] },
       ] },
       { prefix: 'marquee', title: 'Dải chữ chạy', fields: [{ k: 'items', t: 'lines', label: 'Các cụm từ' }] },

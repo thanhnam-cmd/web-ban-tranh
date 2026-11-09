@@ -144,8 +144,20 @@
   const collections = () => (S.collections || []).filter((c) => c && (c.title || c.category));
   const colId = (i) => (i === 0 ? 'bo-suu-tap' : 'bst-' + (i + 1));
 
+  const letter = (i) => String.fromCharCode(65 + i);
+  const countOf = (c) => P.filter((p) => c.category && p.category === c.category).length;
+
   function collectionsHTML() {
-    return collections().map((c, i) => {
+    const cols = collections();
+    const tabs = cols.length > 1 ? `<section class="col-tabs-wrap"><div class="container">
+      <header class="sec-head sec-head--center"><p class="eyebrow" data-reveal>Hai bộ sưu tập chính</p><h2 class="h2" data-lines>${splitLines('Chọn dòng mành\nbạn yêu thích')}</h2></header>
+      <div class="col-tabs">${cols.map((c, i) => `<a class="col-tab" href="#${colId(i)}" data-reveal>
+        <span class="col-badge">${letter(i)}</span>
+        <span class="col-tab__text"><small>Bộ sưu tập ${letter(i)}</small><b>${h(c.name || c.category)}</b>${c.nameNote ? `<em>${h(c.nameNote)}</em>` : ''}</span>
+        <span class="col-tab__count">${countOf(c) ? countOf(c) + ' mẫu' : 'Đang cập nhật'} →</span>
+      </a>`).join('')}</div>
+    </div></section>` : '';
+    return tabs + cols.map((c, i) => {
       const list = P.filter((p) => c.category && p.category === c.category);
       let belt = '';
       if (list.length) {
@@ -159,10 +171,13 @@
       }
       return `<section class="featured featured--${i % 2 ? 'b' : 'a'}" id="${colId(i)}">
         <div class="container featured__head">
-          <div><p class="eyebrow" data-reveal>${h(c.eyebrow)}</p><h2 class="h2" data-lines>${splitLines(c.title)}</h2></div>
+          <div class="col-head">
+            <div class="col-head__name" data-reveal><span class="col-badge">${letter(i)}</span><span><small>Bộ sưu tập ${letter(i)}</small><b>${h(c.name || c.category || c.eyebrow)}</b>${c.nameNote ? `<em>(${h(c.nameNote)})</em>` : ''}</span></div>
+            <h2 class="h2" data-lines>${splitLines(c.title)}</h2>
+          </div>
           <div class="featured__aside" data-reveal>
             <p class="featured__sub">${h(c.description)}</p>
-            ${(c.highlights || []).length ? `<ul class="highlights">${c.highlights.map((t) => `<li>${h(t)}</li>`).join('')}</ul>` : ''}
+            ${(c.highlights || []).length ? `<div class="col-meaning"><b>${h(c.highlightsTitle || 'Ý nghĩa / Điểm nhấn')}</b><ul class="highlights">${c.highlights.map((t) => `<li>${h(t)}</li>`).join('')}</ul></div>` : ''}
             <div class="featured__ctrl">
               ${list.length ? `<button class="arrow" data-belt="-1" aria-label="Mẫu trước">←</button><button class="arrow" data-belt="1" aria-label="Mẫu tiếp">→</button>` : ''}
               <a href="#dat-hang" class="link-arrow">Chọn mẫu & đặt mua <span>→</span></a>
@@ -193,10 +208,10 @@
     return `<section class="spaces" id="khong-gian">
       <div class="container">
         <header class="sec-head"><p class="eyebrow" data-reveal>${h(sp.eyebrow)}</p><h2 class="h2" data-lines>${splitLines(sp.title)}</h2><p class="sec-head__sub" data-reveal>${h(sp.subtitle)}</p></header>
-        <div class="spaces__stack">
-          ${sp.items.map((it, i) => `<article class="space" style="--i:${i}">
-            <div class="space__img"><img src="${url(it.image)}" alt="${h(it.title)}" loading="lazy"></div>
-            <div class="space__body"><span class="space__num">${pad(i + 1)} / ${pad(sp.items.length)}</span><h3>${h(it.title)}</h3><p>${h(it.text)}</p><a href="#tat-ca" class="link-arrow">Chọn tranh phù hợp <span>→</span></a></div>
+        <div class="spaces__grid">
+          ${sp.items.map((it, i) => `<article class="space-card" data-reveal>
+            <div class="space-card__img"><img src="${url(it.image)}" alt="${h(it.title)}" loading="lazy"></div>
+            <div class="space-card__body"><span class="space-card__num">${pad(i + 1)}</span><h3>${h(it.title)}</h3><p>${h(it.text)}</p></div>
           </article>`).join('')}
         </div>
       </div>
@@ -343,7 +358,7 @@
     const an = S.announcement || {};
     if (an.enabled && an.text) { $('#announce').innerHTML = `<div class="announce__inner">${h(an.text)}</div>`; document.body.classList.add('has-announce'); } else $('#announce').remove();
     $('#logo').innerHTML = logoHTML();
-    $('#nav').innerHTML = collections().map((c, i) => `<a href="#${colId(i)}">${h(c.category || 'Bộ sưu tập ' + (i + 1))}</a>`).join('')
+    $('#nav').innerHTML = collections().map((c, i) => `<a href="#${colId(i)}">${h(c.navLabel || c.category || 'Bộ sưu tập ' + (i + 1))}</a>`).join('')
       + '<a href="#quy-trinh">Chất liệu</a><a href="#hoi-dap">Hỏi đáp</a><a href="#dat-hang">Đặt hàng</a>';
     $('#preloaderBrand').innerHTML = [...String(shortName())].map((c, i) => `<span style="--i:${i}">${c === ' ' ? '&nbsp;' : h(c)}</span>`).join('');
     const hp = $('#headerPhone');
@@ -928,12 +943,6 @@
     // dải tranh nổi bật trượt nhẹ vào khi xuất hiện
     $$('.belt').forEach((b) => gsap.from(b, { x: 120, autoAlpha: 0, duration: 1.4, ease: 'expo.out', scrollTrigger: { trigger: b, start: 'top 90%' } }));
 
-    // không gian: các thẻ xếp chồng, thẻ trước lùi xa & tối dần
-    const spaces = $$('.space');
-    spaces.forEach((card, i) => {
-      const next = spaces[i + 1]; if (!next) return;
-      gsap.to(card, { scale: 0.9, filter: 'brightness(0.45)', ease: 'none', scrollTrigger: { trigger: next, start: 'top bottom', end: 'top 20%', scrub: true } });
-    });
 
     // chữ khổng lồ ở chân trang
     gsap.from('.footer__big span', { yPercent: 100, ease: 'expo.out', duration: 1.4, stagger: 0.04, scrollTrigger: { trigger: '.footer__big', start: 'top 95%' } });

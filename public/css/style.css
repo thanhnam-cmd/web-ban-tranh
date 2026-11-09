@@ -722,3 +722,58 @@ body::before { display: none; }
   .music-btn__label { display: none; }
   .music-btn { width: 44px; padding: 0; justify-content: center; }
 }
+
+/* ---------- dải sản phẩm: thẳng hàng, cao bằng nhau ---------- */
+.belt__group { align-items: stretch; }
+.card--feature:nth-child(4n+2) { margin-top: 0; }
+
+/* ---------- 2 bộ sưu tập A / B ---------- */
+.col-tabs-wrap { padding: 110px 0 10px; }
+.col-tabs-wrap .sec-head { margin-bottom: 40px; }
+.col-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.col-tab { display: flex; align-items: center; gap: 18px; padding: 24px 26px; border-radius: 22px; background: var(--paper); border: 1px solid color-mix(in srgb, var(--accent) 22%, transparent); text-decoration: none; color: var(--ink); box-shadow: 0 20px 40px -32px rgba(142, 31, 44, .5); transition: transform .5s var(--ease), box-shadow .5s var(--ease), border-color .3s; }
+.col-tab:hover { transform: translateY(-4px); border-color: var(--accent); box-shadow: 0 30px 50px -30px rgba(142, 31, 44, .55); }
+.col-badge { flex: none; width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; background: linear-gradient(135deg, var(--accent), var(--plum)); color: #fff; font-family: var(--serif); font-size: 1.7rem; font-weight: 600; box-shadow: 0 8px 18px -8px var(--accent); }
+.col-tab__text { flex: 1; display: grid; gap: 2px; }
+.col-tab__text small, .col-head__name small { font-size: .7rem; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--accent); }
+.col-tab__text b { font-family: var(--serif); font-size: 1.5rem; font-weight: 600; line-height: 1.15; }
+.col-tab__text em { font-style: normal; color: var(--muted); font-size: .9rem; }
+.col-tab__count { flex: none; padding: 7px 14px; border-radius: 999px; background: color-mix(in srgb, var(--ochre) 22%, #fff); color: var(--plum); font-size: .82rem; font-weight: 600; white-space: nowrap; }
+
+.col-head { display: grid; gap: 18px; }
+.col-head__name { display: flex; align-items: center; gap: 14px; }
+.col-head__name > span:last-child { display: grid; gap: 2px; }
+.col-head__name b { font-size: 1.05rem; font-weight: 600; letter-spacing: .02em; color: var(--plum); text-transform: uppercase; }
+.col-head__name em { font-style: normal; color: var(--muted); font-size: .9rem; }
+.col-meaning { display: grid; gap: 10px; padding: 16px 18px; border-radius: 16px; background: color-mix(in srgb, var(--paper) 85%, transparent); border-left: 4px solid var(--ochre); }
+.col-meaning > b { font-size: .74rem; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
+
+/* ---------- Gợi ý không gian: lưới đơn giản ---------- */
+.spaces { padding: 120px 0 100px; }
+.spaces__grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+.space-card { display: flex; flex-direction: column; background: var(--paper); border-radius: 20px; overflow: hidden; box-shadow: 0 1px 0 var(--line), 0 24px 44px -32px rgba(142, 31, 44, .45); transition: transform .5s var(--ease), box-shadow .5s var(--ease); }
+.space-card:hover { transform: translateY(-6px); box-shadow: 0 1px 0 var(--line), 0 34px 56px -30px rgba(142, 31, 44, .5); }
+.space-card__img { aspect-ratio: 4 / 5; overflow: hidden; background: var(--bg-2); }
+.space-card__img img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 35%; transition: transform 1.2s var(--ease); }
+.space-card:hover .space-card__img img { transform: scale(1.05); }
+.space-card__body { padding: 20px 22px 26px; display: grid; gap: 8px; }
+.space-card__num { font-size: .72rem; font-weight: 600; letter-spacing: .18em; color: var(--accent); }
+.space-card h3 { margin: 0; font-family: var(--serif); font-size: 1.6rem; font-weight: 600; line-height: 1.1; }
+.space-card p { margin: 0; color: var(--muted); font-size: .94rem; }
+
+@media (max-width: 1100px) {
+  .spaces__grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 900px) {
+  .col-tabs { grid-template-columns: 1fr; }
+  .col-tabs-wrap { padding-top: 80px; }
+}
+@media (max-width: 600px) {
+  .col-tab { padding: 18px; gap: 12px; flex-wrap: wrap; }
+  .col-tab__text b { font-size: 1.25rem; }
+  .col-badge { width: 44px; height: 44px; font-size: 1.4rem; }
+  .spaces__grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+  .space-card__body { padding: 14px 14px 18px; }
+  .space-card h3 { font-size: 1.2rem; }
+  .space-card p { font-size: .85rem; }
+}
