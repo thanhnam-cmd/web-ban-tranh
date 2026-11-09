@@ -811,3 +811,72 @@ body::before { display: none; }
 @media (max-width: 600px) {
   .col-tab__foot { flex-direction: column; align-items: flex-start; padding: 14px 16px; gap: 8px; }
 }
+
+/* =========================================================
+   CHỐNG CHỒNG CHỮ Ở MỌI KÍCH THƯỚC / MỨC ZOOM
+   ========================================================= */
+/* Banner tự giãn theo nội dung: luôn chừa chỗ cho thanh menu phía trên và chấm slide phía dưới */
+.hero { height: auto; min-height: 100vh; min-height: 100svh; }
+.hero__content {
+  height: auto; min-height: 100vh; min-height: 100svh;
+  padding-top: calc(var(--header) + var(--ann) + clamp(24px, 5vh, 56px));
+  padding-bottom: clamp(104px, 14vh, 140px);
+}
+/* cỡ chữ theo cả chiều ngang lẫn chiều cao màn hình */
+.hero__title { font-size: clamp(2.3rem, min(6.2vw, 10vh), 6.4rem); margin-bottom: clamp(14px, 2.6vh, 26px); }
+.hero__sub { font-size: clamp(.92rem, min(1.25vw, 2.2vh), 1.08rem); }
+.hero__cta { margin-top: clamp(18px, 4vh, 40px); }
+.hero__text .eyebrow { margin-bottom: clamp(10px, 2vh, 20px); }
+.hero__ui { bottom: clamp(18px, 3.5vh, 34px); }
+.hero__slide .hero__art { height: min(70vh, 720px, 100% - var(--header) - var(--ann) - 120px); margin-top: calc(min(70vh, 720px) / -2); }
+.hero__dots { flex-wrap: wrap; }
+
+/* Thanh menu: không để logo – menu – nút chen nhau */
+.header__inner { gap: clamp(12px, 2vw, 24px); }
+.nav { gap: clamp(14px, 1.9vw, 34px); flex-wrap: nowrap; }
+.logo { min-width: 0; }
+.logo__text { min-width: 0; white-space: nowrap; }
+.logo .logo__text small { overflow: hidden; text-overflow: ellipsis; }
+@media (max-width: 1240px) { .header__phone { display: none; } }
+
+/* Tiêu đề lớn các phần: giới hạn theo chiều cao để không tràn khi zoom nhỏ / màn hình thấp */
+.h2 { font-size: clamp(2.2rem, min(5.2vw, 9.5vh), 5.2rem); }
+.featured__head, .catalog__head { flex-wrap: wrap; }
+.featured__head > * { min-width: 0; }
+.featured__aside { flex: 1 1 360px; }
+.col-head { flex: 1 1 420px; min-width: 0; }
+
+/* Khung quy trình bám dính: không cao quá màn hình */
+.process__visual { top: calc(var(--header) + 20px); }
+
+@media (max-width: 900px) {
+  .hero__content { padding-bottom: 120px; }
+  .hero__title { font-size: clamp(2.2rem, min(10.5vw, 7.5vh), 3.6rem); }
+  .featured__aside { flex-basis: auto; }
+}
+@media (max-height: 560px) and (min-width: 901px) {
+  .announce { display: none; }
+  body.has-announce { --ann: 0px; }
+}
+
+/* Chữ lớn chân trang: tự co theo độ dài tên, luôn hiện trọn (kể cả dấu và đuôi chữ g, y…) */
+.footer__big {
+  --n: 10;
+  font-size: min(calc(150vw / var(--n)), 15rem);
+  line-height: 1.12;
+  letter-spacing: -.02em;
+  padding: .06em .04em .14em;
+  margin: clamp(40px, 7vw, 90px) auto 16px;
+  max-width: 100%;
+}
+.footer__big span { padding-bottom: .02em; }
+
+/* Thanh thông báo trên điện thoại: chữ chạy để luôn đọc được hết */
+@media (max-width: 760px) {
+  .announce { justify-items: start; padding: 0; }
+  .announce__inner { display: inline-block; max-width: none; overflow: visible; padding-left: 100vw; animation: annScroll 22s linear infinite; }
+}
+@keyframes annScroll { to { transform: translateX(-100%); } }
+@media (prefers-reduced-motion: reduce) {
+  .announce__inner { animation: none; padding-left: 12px; }
+}

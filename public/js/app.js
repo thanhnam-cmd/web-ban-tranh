@@ -349,7 +349,7 @@
           </div>
         </div>
       </div>
-      <div class="footer__big" aria-hidden="true">${[...String(shortName())].map((c) => `<span>${c === ' ' ? '&nbsp;' : h(c)}</span>`).join('')}</div>
+      <div class="footer__big" aria-hidden="true" style="--n:${Math.max(4, [...String(shortName())].length)}">${[...String(shortName())].map((c) => `<span>${c === ' ' ? '&nbsp;' : h(c)}</span>`).join('')}</div>
       <div class="container footer__bottom"><span>${h(ft.copyright)}</span><a href="#top">Lên đầu trang ↑</a></div>`;
   }
 
