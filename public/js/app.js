@@ -154,7 +154,7 @@
         ${url(c.image) ? `<span class="col-tab__img"><img src="${url(c.image)}" alt="${h(c.name || c.category)}" loading="lazy"></span>` : ''}
         <span class="col-tab__foot">
           <span class="col-tab__text"><b>${h(c.name || c.category)}</b>${c.nameNote ? `<em>${h(c.nameNote)}</em>` : ''}</span>
-          <span class="col-tab__count">${countOf(c) ? countOf(c) + ' mẫu · Xem sản phẩm' : 'Đang cập nhật'} →</span>
+          <span class="col-tab__count">${countOf(c) ? 'Xem sản phẩm' : 'Đang cập nhật'} →</span>
         </span>
       </a>`).join('')}</div>
     </div></section>` : '';
