@@ -55,9 +55,13 @@
   const cartCount = () => cart.reduce((s, i) => s + i.qty, 0);
 
   /* ---------------- khối giao diện ---------------- */
-  const logoHTML = () => brand.logo
-    ? `<img src="${url(brand.logo)}" alt="${h(brand.name)}">`
-    : `<span class="logo__mark"></span><span class="logo__text"><b>${h(brand.name)}</b><small>${h(brand.tagline)}</small></span>`;
+  const shortName = () => brand.shortName || brand.name || '';
+  // "Xưởng Mành tre trúc Hồng Dương" -> dòng nhỏ "Xưởng Mành tre trúc" + chữ lớn "Hồng Dương"
+  const logoHTML = () => {
+    const full = String(brand.name || ''), sn = shortName();
+    const pre = sn && full !== sn && full.endsWith(sn) ? full.slice(0, -sn.length).trim() : '';
+    return `${brand.logo ? `<img class="logo__img" src="${url(brand.logo)}" alt="">` : '<span class="logo__mark"></span>'}<span class="logo__text">${pre ? `<em>${h(pre)}</em>` : ''}<b>${h(pre ? sn : full)}</b><small>${h(brand.tagline)}</small></span>`;
+  };
 
   const sizeBtns = (p, sel) => (p.sizes || []).map((s) => `
     <button type="button" class="size${s.label === sel ? ' is-active' : ''}" data-size="${h(s.label)}">
@@ -69,7 +73,7 @@
   const cardHTML = (p, cls = '') => {
     const m = minSize(p);
     return `<article class="card ${cls}" data-id="${h(p.id)}" data-cat="${h(p.category)}">
-      <button class="card__media" data-open="${h(p.id)}" data-cursor="Xem tranh" aria-label="Xem ${h(p.name)}">
+      <button class="card__media" data-open="${h(p.id)}" data-cursor="Xem mẫu" aria-label="Xem ${h(p.name)}">
         <span class="card__frame"><img src="${url(p.images[0])}" alt="${h(p.name)}" loading="lazy"></span>
         ${p.badge ? `<span class="badge">${h(p.badge)}</span>` : ''}
         ${m && pct(m) ? `<span class="badge badge--sale">-${pct(m)}%</span>` : ''}
@@ -91,7 +95,7 @@
     const slides = hs.slides && hs.slides.length ? hs.slides : [{ title: brand.name }];
     return `<section class="hero" id="top">
       <div class="hero__frame"><div class="hero__media">
-        ${slides.map((s, i) => `<div class="hero__slide${i ? '' : ' is-active'}"><img src="${url(s.image)}" alt="" ${i ? 'loading="lazy"' : 'fetchpriority="high"'}></div>`).join('')}
+        ${slides.map((s, i) => `<div class="hero__slide${i ? '' : ' is-active'}"><img class="hero__bg" src="${url(s.image)}" alt="" ${i ? 'loading="lazy"' : 'fetchpriority="high"'}><img class="hero__art" src="${url(s.image)}" alt="" ${i ? 'loading="lazy"' : ''}></div>`).join('')}
         <div class="hero__shade"></div>
       </div></div>
       <div class="hero__content container">
@@ -103,7 +107,7 @@
         </div>`).join('')}
         </div>
         <div class="hero__cta">
-          <a href="#bo-suu-tap" class="btn btn--light">${h(hs.ctaPrimary || 'Khám phá')} <span aria-hidden="true">→</span></a>
+          <a href="#bo-suu-tap" class="btn btn--accent">${h(hs.ctaPrimary || 'Khám phá')} <span aria-hidden="true">→</span></a>
           <a href="#dat-hang" class="btn btn--ghost-light">${h(hs.ctaSecondary || 'Đặt hàng')}</a>
         </div>
       </div>
@@ -137,30 +141,37 @@
     </section>`;
   }
 
-  function featuredHTML() {
-    const c = S.collection || {};
-    let list = P.filter((p) => p.featured);
-    if (!list.length) list = P.slice(0, 8);
-    if (!list.length) return '';
-    let row = list;
-    while (row.length < 8) row = row.concat(list); // đủ dài để dải trôi liền mạch
-    const group = row.map((p) => cardHTML(p, 'card--feature')).join('');
-    return `<section class="featured" id="bo-suu-tap">
-      <div class="container featured__head">
-        <div><p class="eyebrow" data-reveal>${h(c.eyebrow)}</p><h2 class="h2" data-lines>${splitLines(c.title)}</h2></div>
-        <div class="featured__aside" data-reveal>
-          <p class="featured__sub">${h(c.subtitle)}</p>
-          <div class="featured__ctrl">
-            <button class="arrow" data-belt="-1" aria-label="Tranh trước">←</button>
-            <button class="arrow" data-belt="1" aria-label="Tranh tiếp">→</button>
-            <a href="#tat-ca" class="link-arrow">Xem tất cả ${P.length} tác phẩm <span>→</span></a>
+  const collections = () => (S.collections || []).filter((c) => c && (c.title || c.category));
+  const colId = (i) => (i === 0 ? 'bo-suu-tap' : 'bst-' + (i + 1));
+
+  function collectionsHTML() {
+    return collections().map((c, i) => {
+      const list = P.filter((p) => c.category && p.category === c.category);
+      let belt = '';
+      if (list.length) {
+        let row = list;
+        while (row.length < 8) row = row.concat(list); // đủ dài để dải trôi liền mạch
+        const group = row.map((p) => cardHTML(p, 'card--feature')).join('');
+        belt = `<div class="belt"><div class="belt__track"><div class="belt__group">${group}</div><div class="belt__group" aria-hidden="true" inert>${group}</div></div></div>`;
+      } else {
+        belt = `<div class="container"><div class="col-empty" data-reveal><span class="col-empty__icon">🎋</span><p>${h(c.emptyText || 'Mẫu đang được cập nhật.')}</p>
+          <div class="col-empty__btns">${brand.zalo ? `<a class="btn btn--accent" href="${zalo(brand.zalo)}" target="_blank" rel="noopener">Nhắn Zalo xem mẫu</a>` : ''}${brand.phone ? `<a class="btn btn--line" href="${tel(brand.phone)}">Gọi ${h(brand.phone)}</a>` : ''}</div></div></div>`;
+      }
+      return `<section class="featured featured--${i % 2 ? 'b' : 'a'}" id="${colId(i)}">
+        <div class="container featured__head">
+          <div><p class="eyebrow" data-reveal>${h(c.eyebrow)}</p><h2 class="h2" data-lines>${splitLines(c.title)}</h2></div>
+          <div class="featured__aside" data-reveal>
+            <p class="featured__sub">${h(c.description)}</p>
+            ${(c.highlights || []).length ? `<ul class="highlights">${c.highlights.map((t) => `<li>${h(t)}</li>`).join('')}</ul>` : ''}
+            <div class="featured__ctrl">
+              ${list.length ? `<button class="arrow" data-belt="-1" aria-label="Mẫu trước">←</button><button class="arrow" data-belt="1" aria-label="Mẫu tiếp">→</button>` : ''}
+              <a href="#dat-hang" class="link-arrow">Chọn mẫu & đặt mua <span>→</span></a>
+            </div>
           </div>
         </div>
-      </div>
-      <div class="belt" id="belt">
-        <div class="belt__track"><div class="belt__group">${group}</div><div class="belt__group" aria-hidden="true" inert>${group}</div></div>
-      </div>
-    </section>`;
+        ${belt}
+      </section>`;
+    }).join('');
   }
 
   function catalogHTML() {
@@ -265,7 +276,7 @@
             <label class="field field--full"><span>Ghi chú (kích thước riêng, thời gian giao…)</span><textarea name="note" rows="2" maxlength="1000"></textarea></label>
             <input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
           </div>
-          <div class="order__total"><span>Tổng tiền <small>(miễn phí vận chuyển)</small></span><strong id="orderTotal">0đ</strong></div>
+          <div class="order__total"><span>Tổng tiền <small>(tạm tính)</small></span><strong id="orderTotal">0đ</strong></div>
           <p class="form-error" id="orderError" role="alert"></p>
           <button class="btn btn--accent btn--block btn--lg" type="submit" id="orderSubmit">Gửi đơn đặt hàng</button>
           <p class="order__fine">Đây là yêu cầu đặt hàng, chưa phải thanh toán. Hoặc đặt nhanh qua <a href="${zalo(brand.zalo)}" target="_blank" rel="noopener">Zalo</a>.</p>
@@ -292,7 +303,7 @@
   function faqHTML() {
     const f = S.faq || {};
     if (!(f.items || []).length) return '';
-    return `<section class="faq"><div class="container faq__grid">
+    return `<section class="faq" id="hoi-dap"><div class="container faq__grid">
       <h2 class="h2" data-lines>${splitLines(f.title)}</h2>
       <div class="faq__list">${f.items.map((q, i) => `<details${i ? '' : ' open'} data-reveal><summary>${h(q.q)}<i></i></summary><p>${h(q.a)}</p></details>`).join('')}</div>
     </div></section>`;
@@ -304,15 +315,17 @@
         <div class="footer__about"><a href="#top" class="logo">${logoHTML()}</a><p>${h(ft.about)}</p></div>
         <div><h4>Liên hệ</h4><ul>
           ${brand.phone ? `<li><a href="${tel(brand.phone)}">☎ ${h(brand.phone)}</a></li>` : ''}
+          ${brand.phone2 ? `<li><a href="${tel(brand.phone2)}">☎ ${h(brand.phone2)}</a></li>` : ''}
+          ${brand.zalo ? `<li><a href="${zalo(brand.zalo)}" target="_blank" rel="noopener">💬 Zalo ${h(brand.zalo)}</a></li>` : ''}
           ${brand.email ? `<li><a href="mailto:${h(brand.email)}">✉ ${h(brand.email)}</a></li>` : ''}
           ${brand.address ? `<li>⌂ ${h(brand.address)}</li>` : ''}
           ${brand.hours ? `<li>◷ ${h(brand.hours)}</li>` : ''}
         </ul></div>
         <div><h4>Khám phá</h4><ul>
-          <li><a href="#bo-suu-tap">Bộ sưu tập nổi bật</a></li><li><a href="#tat-ca">Tất cả tác phẩm</a></li>
-          <li><a href="#khong-gian">Gợi ý không gian</a></li><li><a href="#dat-hang">Đặt hàng</a></li>
+          ${collections().map((c, i) => `<li><a href="#${colId(i)}">${h(c.category)}</a></li>`).join('')}
+          <li><a href="#tat-ca">Tất cả mẫu mành</a></li><li><a href="#quy-trinh">Chất liệu & quy trình</a></li><li><a href="#dat-hang">Đặt hàng</a></li>
         </ul></div>
-        <div><h4>Đặt tranh ngay</h4>
+        <div><h4>Đặt hàng ngay</h4>
           <div class="footer__btns">
             ${brand.phone ? `<a class="btn btn--accent btn--sm" href="${tel(brand.phone)}">Gọi ${h(brand.phone)}</a>` : ''}
             ${brand.zalo ? `<a class="btn btn--line btn--sm" href="${zalo(brand.zalo)}" target="_blank" rel="noopener">Chat Zalo</a>` : ''}
@@ -320,7 +333,7 @@
           </div>
         </div>
       </div>
-      <div class="footer__big" aria-hidden="true">${[...String(brand.name || '')].map((c) => `<span>${c === ' ' ? '&nbsp;' : h(c)}</span>`).join('')}</div>
+      <div class="footer__big" aria-hidden="true">${[...String(shortName())].map((c) => `<span>${c === ' ' ? '&nbsp;' : h(c)}</span>`).join('')}</div>
       <div class="container footer__bottom"><span>${h(ft.copyright)}</span><a href="#top">Lên đầu trang ↑</a></div>`;
   }
 
@@ -330,11 +343,13 @@
     const an = S.announcement || {};
     if (an.enabled && an.text) { $('#announce').innerHTML = `<div class="announce__inner">${h(an.text)}</div>`; document.body.classList.add('has-announce'); } else $('#announce').remove();
     $('#logo').innerHTML = logoHTML();
-    $('#preloaderBrand').innerHTML = [...String(brand.name || '')].map((c, i) => `<span style="--i:${i}">${c === ' ' ? '&nbsp;' : h(c)}</span>`).join('');
+    $('#nav').innerHTML = collections().map((c, i) => `<a href="#${colId(i)}">${h(c.category || 'Bộ sưu tập ' + (i + 1))}</a>`).join('')
+      + '<a href="#quy-trinh">Chất liệu</a><a href="#hoi-dap">Hỏi đáp</a><a href="#dat-hang">Đặt hàng</a>';
+    $('#preloaderBrand').innerHTML = [...String(shortName())].map((c, i) => `<span style="--i:${i}">${c === ' ' ? '&nbsp;' : h(c)}</span>`).join('');
     const hp = $('#headerPhone');
     if (brand.phone) { hp.href = tel(brand.phone); hp.textContent = brand.phone; } else hp.remove();
 
-    $('#main').innerHTML = heroHTML() + marqueeHTML() + introHTML() + featuredHTML() + catalogHTML() + spacesHTML() + processHTML() + featuresHTML() + orderHTML() + reviewsHTML() + faqHTML();
+    $('#main').innerHTML = heroHTML() + marqueeHTML() + introHTML() + collectionsHTML() + catalogHTML() + spacesHTML() + processHTML() + featuresHTML() + orderHTML() + reviewsHTML() + faqHTML();
     $('#footer').innerHTML = footerHTML();
 
     $('#floatContact').innerHTML = `
@@ -408,7 +423,7 @@
           </div>
           <div class="pm__btns"><button class="btn btn--line" id="pmAdd">Thêm vào giỏ</button><button class="btn btn--accent" id="pmBuy">Đặt ngay</button></div>`
           : `<div class="pm__btns"><a class="btn btn--accent" href="${zalo(brand.zalo)}" target="_blank" rel="noopener">Liên hệ báo giá</a></div>`}
-          <ul class="pm__perks"><li>Miễn phí giao hàng toàn quốc</li><li>Kiểm tra hàng trước khi thanh toán</li><li>Kèm đinh treo, không cần khoan</li></ul>
+          <ul class="pm__perks"><li>Vận chuyển toàn quốc</li><li>Nan trúc tự nhiên, in UV sắc nét</li><li>Nẹp gỗ, dây treo sẵn – cuộn gọn sau Tết</li></ul>
           <div class="pm__desc">${h(p.description).replace(/\n/g, '<br>')}</div>
         </div>
       </div>`;
@@ -655,8 +670,8 @@
   }
 
   /* ---------------- dải tranh trôi ngang (bộ sưu tập nổi bật) ---------------- */
-  function initBelt() {
-    const belt = $('#belt'); if (!belt) return;
+  function initBelts() { $$('.belt').forEach(initBelt); }
+  function initBelt(belt) {
     const track = $('.belt__track', belt);
     const group = $('.belt__group', belt);
     const SPEED = isDesktop() ? 42 : 30; // px mỗi giây
@@ -685,7 +700,7 @@
     belt.addEventListener('click', (e) => { if (drag && drag.moved) { e.preventDefault(); e.stopPropagation(); } }, true);
 
     // nút mũi tên
-    $$('[data-belt]').forEach((b) => b.addEventListener('click', () => {
+    $$('[data-belt]', belt.closest('section')).forEach((b) => b.addEventListener('click', () => {
       const card = $('.card', group);
       const step = card ? card.offsetWidth + parseFloat(getComputedStyle(card).marginRight || 0) + 28 : 320;
       nudge -= Number(b.dataset.belt) * step;
@@ -705,6 +720,89 @@
       requestAnimationFrame(tick);
     };
     requestAnimationFrame(tick);
+  }
+
+  /* ---------------- nút bật nhạc xuân ----------------
+     - Có link nhạc (mp3) trong Quản trị → phát file đó, lặp lại.
+     - Không có → tự chơi một giai điệu ngũ cung tươi vui bằng Web Audio (không cần file, không vướng bản quyền). */
+  function initMusic() {
+    const cfg = S.music || {};
+    if (cfg.enabled === false) return;
+    const btn = document.createElement('button');
+    btn.className = 'music-btn';
+    btn.type = 'button';
+    btn.setAttribute('aria-pressed', 'false');
+    btn.innerHTML = `<span class="music-btn__bars" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span class="music-btn__label">${h(cfg.label || 'Nhạc xuân')}</span>`;
+    document.body.appendChild(btn);
+
+    let playing = false, audio = null, ctx = null, master = null, timer = null, step = 0, nextTime = 0;
+    const fileUrl = url(cfg.url);
+
+    // giai điệu ngũ cung (Đô – Rê – Fa – Sol – La), 0 = nghỉ
+    const N = { C4: 261.63, D4: 293.66, F4: 349.23, G4: 392, A4: 440, C5: 523.25, D5: 587.33, F5: 698.46, G5: 783.99 };
+    const tune = ['G4', 'A4', 'C5', 'A4', 'G4', 'F4', 'D4', 'F4', 'G4', 'A4', 'C5', 'D5', 'C5', 'A4', 'G4', 0,
+      'F4', 'G4', 'A4', 'G4', 'F4', 'D4', 'C4', 'D4', 'F4', 'G4', 'A4', 'C5', 'G4', 0, 0, 0,
+      'C5', 'D5', 'F5', 'D5', 'C5', 'A4', 'G4', 'A4', 'C5', 'D5', 'G5', 'F5', 'D5', 'C5', 'A4', 0,
+      'G4', 'A4', 'C5', 'A4', 'G4', 'F4', 'D4', 'F4', 'G4', 'F4', 'D4', 'C4', 'C4', 0, 0, 0];
+    const bass = [130.81, 98, 87.31, 98]; // C3 G2 F2 G2 – mỗi ô nhịp
+    const BEAT = 60 / 92 / 2; // móc đơn, 92 bpm
+
+    function pluck(freq, t, vol = 0.22, len = 1.1) {
+      const o = ctx.createOscillator(), o2 = ctx.createOscillator(), g = ctx.createGain(), f = ctx.createBiquadFilter();
+      o.type = 'triangle'; o2.type = 'sine';
+      o.frequency.setValueAtTime(freq * 1.012, t); o.frequency.exponentialRampToValueAtTime(freq, t + 0.08); // luyến nhẹ như đàn tranh
+      o2.frequency.setValueAtTime(freq * 2, t);
+      f.type = 'lowpass'; f.frequency.setValueAtTime(3200, t); f.frequency.exponentialRampToValueAtTime(900, t + len);
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + len);
+      const g2 = ctx.createGain(); g2.gain.value = 0.25;
+      o.connect(f); o2.connect(g2); g2.connect(f); f.connect(g); g.connect(master);
+      o.start(t); o2.start(t); o.stop(t + len + 0.05); o2.stop(t + len + 0.05);
+    }
+    function schedule() {
+      while (nextTime < ctx.currentTime + 0.25) {
+        const note = tune[step % tune.length];
+        if (note) pluck(N[note], nextTime);
+        if (step % 8 === 0) pluck(bass[(step / 8) % bass.length], nextTime, 0.16, 2.4);
+        if (step % 32 === 28) pluck(N.C5 * 2, nextTime, 0.05, 1.8); // tiếng chuông nhỏ
+        nextTime += BEAT; step++;
+      }
+    }
+    function startSynth() {
+      ctx = ctx || new (window.AudioContext || window.webkitAudioContext)();
+      if (!master) {
+        master = ctx.createGain(); master.gain.value = 0;
+        const delay = ctx.createDelay(); delay.delayTime.value = BEAT * 3;
+        const fb = ctx.createGain(); fb.gain.value = 0.28;
+        master.connect(ctx.destination); master.connect(delay); delay.connect(fb); fb.connect(delay); fb.connect(ctx.destination);
+      }
+      ctx.resume();
+      master.gain.cancelScheduledValues(ctx.currentTime);
+      master.gain.setTargetAtTime(0.5, ctx.currentTime, 0.4);
+      nextTime = ctx.currentTime + 0.1;
+      timer = setInterval(schedule, 80);
+    }
+    function stopSynth() {
+      clearInterval(timer);
+      if (master) master.gain.setTargetAtTime(0, ctx.currentTime, 0.3);
+    }
+    function toggle() {
+      playing = !playing;
+      try {
+        if (fileUrl) {
+          audio = audio || Object.assign(new Audio(fileUrl), { loop: true, volume: 0.5 });
+          if (playing) audio.play().catch(() => { playing = false; update(); toast('Không phát được nhạc.'); }); else audio.pause();
+        } else if (playing) startSynth(); else stopSynth();
+      } catch (e) { playing = false; }
+      update();
+    }
+    function update() {
+      btn.classList.toggle('is-on', playing);
+      btn.setAttribute('aria-pressed', String(playing));
+      btn.setAttribute('aria-label', playing ? 'Tắt nhạc xuân' : 'Bật nhạc xuân');
+    }
+    update();
+    btn.addEventListener('click', toggle);
+    document.addEventListener('visibilitychange', () => { if (document.hidden && playing) toggle(); });
   }
 
   /* ---------------- con trỏ tuỳ biến ---------------- */
@@ -828,7 +926,7 @@
     });
 
     // dải tranh nổi bật trượt nhẹ vào khi xuất hiện
-    gsap.from('.belt', { x: 120, autoAlpha: 0, duration: 1.4, ease: 'expo.out', scrollTrigger: { trigger: '.belt', start: 'top 90%' } });
+    $$('.belt').forEach((b) => gsap.from(b, { x: 120, autoAlpha: 0, duration: 1.4, ease: 'expo.out', scrollTrigger: { trigger: b, start: 'top 90%' } }));
 
     // không gian: các thẻ xếp chồng, thẻ trước lùi xa & tối dần
     const spaces = $$('.space');
@@ -865,7 +963,8 @@
   initOrder();
   initCountdown();
   initEvents();
-  initBelt();
+  initBelts();
+  initMusic();
   initCursor();
   initTilt();
   initMotion();

@@ -359,7 +359,7 @@
     const area = $('#formArea');
     const draw = () => {
       const y = window.scrollY;
-      area.innerHTML = schema.map((s) => `<section class="panel" id="sec-${s.prefix}">
+      area.innerHTML = schema.map((s) => `<section class="panel" id="sec-${s.prefix || 'root'}">
         <div class="panel__head"><h2>${s.title}</h2>${s.desc ? `<p>${s.desc}</p>` : ''}</div>
         <div class="panel__body form-grid">${s.fields.map((f) => fieldHTML(f, state.draft, s.prefix)).join('')}</div></section>`).join('');
       window.scrollTo(0, y);
@@ -396,6 +396,9 @@
         ] },
         T('ctaPrimary', 'Chữ trên nút chính'), T('ctaSecondary', 'Chữ trên nút phụ'),
       ] },
+      { prefix: 'music', title: 'Nút bật nhạc xuân', desc: 'Để trống link nhạc thì website tự chơi một giai điệu xuân nhẹ nhàng. Muốn dùng bài riêng, dán link file .mp3 (bạn cần có quyền sử dụng bài nhạc đó).', fields: [
+        { k: 'enabled', t: 'toggle', label: 'Hiển thị nút nhạc xuân' }, T('label', 'Chữ trên nút'), T('url', 'Link file nhạc .mp3 (tuỳ chọn)', { wide: true }),
+      ] },
       { prefix: 'announcement', title: 'Thanh thông báo trên cùng', fields: [{ k: 'enabled', t: 'toggle', label: 'Hiển thị thanh thông báo' }, T('text', 'Nội dung', { wide: true })] },
       { prefix: 'promo', title: 'Ưu đãi & đồng hồ đếm ngược', desc: 'Để trống ngày kết thúc để đồng hồ tự đếm đến hết ngày hôm nay (ưu đãi trong ngày).', fields: [
         { k: 'enabled', t: 'toggle', label: 'Hiển thị khối ưu đãi' }, T('eyebrow', 'Nhãn nhỏ'), T('title', 'Tiêu đề', { wide: true }), TA('text', 'Mô tả', { wide: true }),
@@ -406,10 +409,17 @@
 
   function pageContent() {
     const sections = [
+      { prefix: '', title: 'Các bộ sưu tập', desc: 'Mỗi bộ sưu tập hiển thị các sản phẩm có “Danh mục” trùng với ô Danh mục (VD: Mành Lịch Tết). Chưa có sản phẩm thì hiện lời mời nhắn Zalo.', fields: [
+        { k: 'collections', t: 'list', label: 'Bộ sưu tập', item: 'Bộ sưu tập', fields: [
+          T('category', 'Danh mục sản phẩm (phải trùng với danh mục của sản phẩm)'), T('eyebrow', 'Nhãn nhỏ'),
+          TA('title', 'Tiêu đề (Enter để xuống dòng)', { rows: 2 }), TA('description', 'Mô tả', { wide: true, rows: 4 }),
+          { k: 'highlights', t: 'lines', label: 'Ý nghĩa / điểm nhấn' }, TA('emptyText', 'Lời nhắn khi chưa có sản phẩm', { wide: true, rows: 2 }),
+        ] },
+      ] },
       { prefix: 'marquee', title: 'Dải chữ chạy', fields: [{ k: 'items', t: 'lines', label: 'Các cụm từ' }] },
       { prefix: 'intro', title: 'Giới thiệu', fields: [T('eyebrow', 'Nhãn nhỏ'), TA('statement', 'Câu tuyên ngôn lớn', { wide: true }), TA('body', 'Đoạn mô tả', { wide: true, rows: 4 }), { k: 'image', t: 'image', label: 'Ảnh minh hoạ (dọc 4:5)' },
         { k: 'stats', t: 'list', label: 'Số liệu nổi bật', item: 'Số liệu', compact: true, fields: [T('value', 'Con số'), T('suffix', 'Hậu tố (+, th…)'), T('label', 'Mô tả')] }] },
-      { prefix: 'collection', title: 'Bộ sưu tập', desc: 'Sản phẩm được đánh dấu “Nổi bật” sẽ hiện ở dải cuộn ngang.', fields: [T('eyebrow', 'Nhãn nhỏ'), TA('title', 'Tiêu đề (Enter để xuống dòng)', { rows: 2 }), TA('subtitle', 'Mô tả', { wide: true, rows: 2 }), T('allTitle', 'Tiêu đề lưới tất cả tác phẩm')] },
+      { prefix: 'collection', title: 'Lưới tất cả sản phẩm', fields: [T('allTitle', 'Tiêu đề lưới tất cả sản phẩm')] },
       { prefix: 'spaces', title: 'Gợi ý không gian', fields: [T('eyebrow', 'Nhãn nhỏ'), TA('title', 'Tiêu đề', { rows: 2 }), TA('subtitle', 'Mô tả', { wide: true, rows: 2 }),
         { k: 'items', t: 'list', label: 'Không gian', item: 'Không gian', fields: [T('title', 'Tên không gian'), TA('text', 'Mô tả', { rows: 2 }), { k: 'image', t: 'image', label: 'Ảnh (ngang 4:3)' }] }] },
       { prefix: 'process', title: 'Quy trình / chất lượng', fields: [T('eyebrow', 'Nhãn nhỏ'), TA('title', 'Tiêu đề', { rows: 2 }),
@@ -423,15 +433,15 @@
         { k: 'items', t: 'list', label: 'Câu hỏi', item: 'Câu hỏi', fields: [T('q', 'Câu hỏi', { wide: true }), TA('a', 'Trả lời', { wide: true, rows: 2 })] }] },
       { prefix: 'footer', title: 'Chân trang', fields: [TA('about', 'Giới thiệu ngắn', { wide: true, rows: 2 }), T('copyright', 'Dòng bản quyền', { wide: true })] },
     ];
-    const nav = `<div class="jump">${sections.map((s) => `<a href="#sec-${s.prefix}">${s.title}</a>`).join('')}</div>`;
+    const nav = `<div class="jump">${sections.map((s) => `<a href="#sec-${s.prefix || 'root'}">${s.title}</a>`).join('')}</div>`;
     sectionsPage(sections, nav);
   }
 
   function pageSettings() {
     sectionsPage([
       { prefix: 'brand', title: 'Thương hiệu & liên hệ', desc: 'Số điện thoại & Zalo dùng cho nút gọi nhanh, nút Zalo và chân trang.', fields: [
-        T('name', 'Tên cửa hàng'), T('tagline', 'Khẩu hiệu'), { k: 'logo', t: 'image', label: 'Logo (tuỳ chọn – để trống sẽ dùng chữ)' },
-        T('phone', 'Hotline'), T('zalo', 'Số Zalo'), T('email', 'Email'), T('facebook', 'Link Facebook'), T('address', 'Địa chỉ', { wide: true }), T('hours', 'Giờ làm việc'),
+        T('name', 'Tên thương hiệu'), T('shortName', 'Tên ngắn (màn hình chờ & chữ lớn chân trang)'), T('tagline', 'Khẩu hiệu'), { k: 'logo', t: 'image', label: 'Logo (ảnh vuông – hiển thị dạng tròn)' },
+        T('phone', 'Hotline 1'), T('phone2', 'Hotline 2'), T('zalo', 'Số Zalo'), T('email', 'Email'), T('facebook', 'Link Facebook'), T('address', 'Địa chỉ', { wide: true }), T('hours', 'Giờ làm việc'),
       ] },
       { prefix: 'theme', title: 'Màu sắc', fields: [{ k: 'accent', t: 'color', label: 'Màu nhấn chính (nút, giá, điểm nhấn)' }] },
       { prefix: 'seo', title: 'SEO & chia sẻ mạng xã hội', fields: [T('title', 'Tiêu đề trang (thẻ title)', { wide: true }), TA('description', 'Mô tả (meta description)', { wide: true, rows: 2 }), { k: 'ogImage', t: 'image', label: 'Ảnh khi chia sẻ Facebook/Zalo' }] },
@@ -504,14 +514,14 @@
   const PRODUCT_FIELDS = [
     { k: 'images', t: 'images', label: 'Hình ảnh sản phẩm' },
     T('name', 'Tên tranh *', { wide: true }),
-    T('code', 'Mã sản phẩm', { ph: 'VD: MH13' }),
-    T('category', 'Danh mục', { list: 'catList', ph: 'VD: Phong cảnh' }),
+    T('code', 'Mã sản phẩm', { ph: 'VD: LT09' }),
+    T('category', 'Danh mục', { list: 'catList', ph: 'Mành Lịch Tết hoặc Mành Phông Tết' }),
     T('badge', 'Nhãn nổi bật', { ph: 'VD: Bán chạy, Mới' }),
     { k: 'sort', t: 'number', label: 'Thứ tự hiển thị', step: 1 },
     TA('short', 'Mô tả ngắn (hiện trong thẻ)', { wide: true, rows: 2 }),
     TA('description', 'Mô tả chi tiết', { wide: true, rows: 5 }),
     { k: 'sizes', t: 'list', label: 'Kích thước & giá', item: 'Kích thước', compact: true, fields: [
-      T('label', 'Kích thước', { ph: '60 × 75 cm' }), { k: 'price', t: 'number', label: 'Giá gốc (đ)' }, { k: 'salePrice', t: 'number', label: 'Giá khuyến mãi (đ)', hint: 'Để 0 nếu không giảm giá' },
+      T('label', 'Kích thước', { ph: '50 × 100 cm' }), { k: 'price', t: 'number', label: 'Giá gốc (đ)' }, { k: 'salePrice', t: 'number', label: 'Giá khuyến mãi (đ)', hint: 'Để 0 nếu không giảm giá' },
     ] },
     T('video', 'Link video (YouTube, TikTok, Facebook…)', { wide: true }),
     { k: 'featured', t: 'toggle', label: 'Hiện ở dải “Bộ sưu tập nổi bật”' },
@@ -521,11 +531,11 @@
   function editProduct(id) {
     const orig = id ? state.products.find((p) => p.id === id) : null;
     const draft = orig ? clone(orig) : {
-      name: '', code: 'MH' + String(state.products.length + 1).padStart(2, '0'), category: '', short: '', description: '', images: [], video: '', badge: '', featured: false, visible: true,
+      name: '', code: 'HD' + String(state.products.length + 1).padStart(2, '0'), category: '', short: '', description: '', images: [], video: '', badge: '', featured: false, visible: true,
       sort: (state.products[state.products.length - 1]?.sort || 0) + 1,
-      sizes: [{ label: '40 × 50 cm', price: 690000, salePrice: 450000 }, { label: '60 × 75 cm', price: 1190000, salePrice: 790000 }, { label: '80 × 100 cm', price: 1890000, salePrice: 1290000 }],
+      sizes: [{ label: '50 × 100 cm', price: 450000, salePrice: 0 }, { label: '75 × 150 cm', price: 750000, salePrice: 0 }],
     };
-    const cats = [...new Set(state.products.map((p) => p.category).filter(Boolean))];
+    const cats = [...new Set([...(state.site.collections || []).map((c) => c.category), ...state.products.map((p) => p.category)].filter(Boolean))];
     openSheet(`<div class="sheet__head"><h2>${orig ? 'Sửa sản phẩm' : 'Thêm sản phẩm'}</h2><button class="b b--icon" data-sheet-close>✕</button></div>
       <div class="sheet__body"><datalist id="catList">${cats.map((c) => `<option value="${h(c)}">`).join('')}</datalist><div class="form-grid" id="pForm"></div></div>
       <div class="sheet__foot"><button class="b b--ghost" data-sheet-close>Huỷ</button><button class="b b--primary" id="pSave">${orig ? 'Lưu thay đổi' : 'Thêm sản phẩm'}</button></div>`);
