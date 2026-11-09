@@ -402,8 +402,8 @@
         { k: 'poster', t: 'image', label: 'Ảnh bìa video (ngang 16:9 – để trống thì dùng ảnh của YouTube nếu có)' },
         T('eyebrow', 'Nhãn nhỏ'), TA('title', 'Tiêu đề (Enter để xuống dòng)', { rows: 2 }), TA('subtitle', 'Mô tả ngắn', { wide: true, rows: 2 }),
       ] },
-      { prefix: 'music', title: 'Nút bật nhạc xuân', desc: 'Để trống link nhạc thì website tự chơi một giai điệu xuân nhẹ nhàng. Muốn dùng bài riêng, dán link file .mp3 (bạn cần có quyền sử dụng bài nhạc đó).', fields: [
-        { k: 'enabled', t: 'toggle', label: 'Hiển thị nút nhạc xuân' }, T('label', 'Chữ trên nút'), T('url', 'Link file nhạc .mp3 (tuỳ chọn)', { wide: true }),
+      { prefix: 'music', title: 'Nút bật nhạc xuân', desc: 'Dán link YouTube của bài nhạc (VD: https://www.youtube.com/watch?v=...) hoặc link file .mp3. Với link YouTube, khi khách bấm nút sẽ hiện một trình phát nhỏ ở góc màn hình (trên iPhone, nếu nhạc chưa tự phát, khách chạm ▶ trong khung đó). Để trống thì website tự chơi một giai điệu xuân nhẹ nhàng.', fields: [
+        { k: 'enabled', t: 'toggle', label: 'Hiển thị nút nhạc xuân' }, T('label', 'Chữ trên nút'), T('url', 'Link nhạc (YouTube hoặc .mp3)', { wide: true, ph: 'https://www.youtube.com/watch?v=...' }),
       ] },
       { prefix: 'announcement', title: 'Thanh thông báo trên cùng', fields: [{ k: 'enabled', t: 'toggle', label: 'Hiển thị thanh thông báo' }, T('text', 'Nội dung', { wide: true })] },
       { prefix: 'promo', title: 'Ưu đãi & đồng hồ đếm ngược', desc: 'Để trống ngày kết thúc để đồng hồ tự đếm đến hết ngày hôm nay (ưu đãi trong ngày).', fields: [
@@ -423,7 +423,10 @@
         ] },
       ] },
       { prefix: 'marquee', title: 'Dải chữ chạy', fields: [{ k: 'items', t: 'lines', label: 'Các cụm từ' }] },
-      { prefix: 'intro', title: 'Giới thiệu', fields: [T('eyebrow', 'Nhãn nhỏ'), TA('statement', 'Câu tuyên ngôn lớn', { wide: true }), TA('body', 'Đoạn mô tả', { wide: true, rows: 4 }), { k: 'image', t: 'image', label: 'Ảnh minh hoạ (dọc 4:5)' },
+      { prefix: 'intro', title: 'Giới thiệu', fields: [T('eyebrow', 'Nhãn nhỏ'), TA('statement', 'Câu tuyên ngôn lớn', { wide: true }), TA('body', 'Đoạn mô tả', { wide: true, rows: 4 }),
+        T('video', 'Link video YouTube (thay cho ảnh, bên trái đoạn mô tả)', { wide: true, ph: 'https://www.youtube.com/watch?v=...' }),
+        { k: 'videoPoster', t: 'image', label: 'Ảnh bìa video (để trống thì dùng ảnh của YouTube)' },
+        { k: 'videoVertical', t: 'toggle', label: 'Video dọc (YouTube Shorts / TikTok) – tắt = khung ngang 16:9' },
         { k: 'stats', t: 'list', label: 'Số liệu nổi bật', item: 'Số liệu', compact: true, fields: [T('value', 'Con số'), T('suffix', 'Hậu tố (+, th…)'), T('label', 'Mô tả')] }] },
       { prefix: 'collection', title: 'Lưới tất cả sản phẩm', fields: [T('allTitle', 'Tiêu đề lưới tất cả sản phẩm')] },
       { prefix: 'spaces', title: 'Gợi ý không gian', fields: [T('eyebrow', 'Nhãn nhỏ'), TA('title', 'Tiêu đề', { rows: 2 }), TA('subtitle', 'Mô tả', { wide: true, rows: 2 }),

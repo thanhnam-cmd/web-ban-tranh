@@ -1053,3 +1053,36 @@ body { background: var(--bg); color: var(--ink); }
   .hero2__text { max-width: 560px; }
   .hero2__title { font-size: clamp(2.2rem, min(3.7vw, 7.6vh), 4.4rem); }
 }
+
+/* ===== v6: video phần giới thiệu, căn giữa mô tả video, hero điện thoại vừa 1 màn hình, trình phát nhạc ===== */
+.sec-head--center .sec-head__sub { margin-left: auto; margin-right: auto; text-align: center; }
+.vsec .sec-head .h2 { margin-bottom: 0; }
+.vsec .sec-head__sub { margin-top: 18px; }
+.intro__media .vbox { width: 100%; }
+.vbox--tall { aspect-ratio: 9 / 16; max-width: 380px; }
+@media (min-width: 901px) {
+  .intro__grid { align-items: center; }
+  .intro__media { grid-column: 1 / span 6; }
+  .intro__body { grid-column: 8 / span 5; }
+}
+
+@media (max-width: 900px) {
+  .hero2 { min-height: 100svh; display: flex; flex-direction: column; padding-bottom: 18px; }
+  .hero2__grid { flex: 1 1 auto; display: flex; flex-direction: column; gap: 16px; }
+  .hero2__gallery { order: -1; flex: 1 1 0; height: auto; min-height: 170px; max-height: 440px; gap: 8px; }
+  .hero2__img { border-radius: 10px; }
+  .hero2__text { flex: none; }
+  .hero2__text .eyebrow { margin-bottom: 8px; font-size: .68rem; }
+  .hero2__title { font-size: clamp(1.85rem, 8.4vw, 2.6rem); margin-bottom: 8px; }
+  .hero2__sub { font-size: .93rem; line-height: 1.5; margin-bottom: 14px; }
+  .hero2__cta { gap: 8px; }
+  .hero2__cta .btn { flex: 1 1 100%; padding-top: 12px; padding-bottom: 12px; min-height: 46px; }
+}
+
+.music-mini { position: fixed; right: 22px; bottom: 226px; z-index: 41; width: 256px; border-radius: 12px; overflow: hidden; background: var(--brown); box-shadow: 0 20px 40px -18px rgba(53, 40, 32, .7); }
+.music-mini iframe { display: block; width: 100%; aspect-ratio: 16 / 9; border: 0; background: #000; }
+.music-mini__bar { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 6px 8px 6px 12px; color: #fff1dc; font-size: .8rem; font-weight: 600; }
+.music-mini__bar button { border: 0; background: rgba(255, 250, 244, .15); color: #fff; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; }
+@media (max-width: 900px) {
+  .music-mini { right: 12px; bottom: calc(130px + env(safe-area-inset-bottom)); width: 240px; }
+}

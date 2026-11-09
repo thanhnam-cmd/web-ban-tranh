@@ -129,7 +129,7 @@
       <div class="container intro__grid">
         <p class="eyebrow" data-reveal>${h(it.eyebrow)}</p>
         <h2 class="intro__statement">${words}</h2>
-        <div class="intro__media"><div class="reveal-img"><img src="${url(it.image)}" alt="" loading="lazy" data-parallax></div></div>
+        <div class="intro__media">${vboxHTML(it.video, it.videoPoster, it.videoVertical ? 'vbox--tall' : '')}</div>
         <div class="intro__body">
           <p data-reveal>${h(it.body)}</p>
           <div class="stats">${(it.stats || []).map((s) => `<div class="stat" data-reveal><strong data-count="${h(s.value)}" data-suffix="${h(s.suffix)}">${h(Number(s.value).toLocaleString('vi-VN'))}${h(s.suffix)}</strong><span>${h(s.label)}</span></div>`).join('')}</div>
@@ -161,26 +161,31 @@
     return null;
   }
 
-  function videoHTML() {
-    const v = S.video || {};
-    if (v.enabled === false) return '';
-    const src = videoSource(v.url);
-    const poster = url(v.poster) || (src && src.thumb) || '';
-    return `<section class="vsec" id="video">
-      <div class="container">
-        ${v.title || v.eyebrow ? `<header class="sec-head sec-head--center"><p class="eyebrow" data-reveal>${h(v.eyebrow)}</p><h2 class="h2" data-lines>${splitLines(v.title)}</h2>${v.subtitle ? `<p class="sec-head__sub" data-reveal>${h(v.subtitle)}</p>` : ''}</header>` : ''}
-        <div class="vbox" data-reveal>
+  // Khung video dùng chung: ảnh bìa + nút phát, chỉ nhúng video khi khách bấm
+  function vboxHTML(link, posterImg, extra) {
+    const src = videoSource(link);
+    const poster = url(posterImg) || (src && src.thumb) || '';
+    return `<div class="vbox ${extra || ''}" data-reveal data-video-url="${h(link || '')}">
           ${poster ? `<img class="vbox__poster" src="${poster}" alt="" loading="lazy">` : ''}
           ${src ? `<button class="vbox__play" data-video-play aria-label="Phát video" data-cursor="Phát"><span class="vbox__btn"><svg viewBox="0 0 24 24" width="30" height="30" fill="currentColor"><path d="M8 5.5v13l11-6.5z"/></svg></span><span class="vbox__label">Xem video</span></button>`
             : `<div class="vbox__empty"><span>🎬</span><p>Video đang được cập nhật</p></div>`}
-        </div>
+        </div>`;
+  }
+
+  function videoHTML() {
+    const v = S.video || {};
+    if (v.enabled === false) return '';
+    return `<section class="vsec" id="video">
+      <div class="container">
+        ${v.title || v.eyebrow ? `<header class="sec-head sec-head--center"><p class="eyebrow" data-reveal>${h(v.eyebrow)}</p><h2 class="h2" data-lines>${splitLines(v.title)}</h2>${v.subtitle ? `<p class="sec-head__sub" data-reveal>${h(v.subtitle)}</p>` : ''}</header>` : ''}
+        ${vboxHTML(v.url, v.poster)}
       </div>
     </section>`;
   }
 
   function playVideo(btn) {
     const box = btn.closest('.vbox');
-    const src = videoSource((S.video || {}).url);
+    const src = videoSource(box && box.dataset.videoUrl);
     if (!box || !src) return;
     box.classList.add('is-playing');
     box.innerHTML = src.type === 'video'
@@ -836,6 +841,8 @@
         master.connect(ctx.destination); master.connect(delay); delay.connect(fb); fb.connect(delay); fb.connect(ctx.destination);
       }
       ctx.resume();
+      // mở khoá âm thanh trên điện thoại: phát 1 mẫu rỗng ngay trong lần chạm
+      const sb = ctx.createBufferSource(); sb.buffer = ctx.createBuffer(1, 1, 22050); sb.connect(ctx.destination); sb.start(0);
       master.gain.cancelScheduledValues(ctx.currentTime);
       master.gain.setTargetAtTime(0.5, ctx.currentTime, 0.4);
       nextTime = ctx.currentTime + 0.1;
@@ -845,10 +852,28 @@
       clearInterval(timer);
       if (master) master.gain.setTargetAtTime(0, ctx.currentTime, 0.3);
     }
+    // Link YouTube: mở trình phát nhỏ ở góc màn hình (iPhone chặn tự phát thì khách chạm ▶ trong khung)
+    const ytm = String(cfg.url || '').match(/(?:youtube\.com\/(?:watch\?v=|shorts\/|embed\/|live\/)|youtu\.be\/)([\w-]{11})/);
+    const ytId = ytm && ytm[1];
+    let mini = null;
+    function startYT() {
+      mini = document.createElement('div');
+      mini.className = 'music-mini';
+      mini.innerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${ytId}?autoplay=1&loop=1&playlist=${ytId}&playsinline=1&rel=0" title="${h(cfg.label || 'Nhạc xuân')}" allow="autoplay; encrypted-media"></iframe>
+        <div class="music-mini__bar"><span>♪ ${h(cfg.label || 'Nhạc xuân')}</span><button type="button" aria-label="Tắt nhạc">✕</button></div>`;
+      document.body.appendChild(mini);
+      mini.querySelector('button').addEventListener('click', () => { if (playing) toggle(); });
+    }
+    function stopYT() { if (mini) mini.remove(); mini = null; }
     function toggle() {
       playing = !playing;
       try {
-        if (fileUrl) {
+        if (navigator.audioSession) navigator.audioSession.type = 'playback'; // iPhone: phát cả khi bật chế độ im lặng
+      } catch (e) { /* bỏ qua */ }
+      try {
+        if (ytId) {
+          if (playing) startYT(); else stopYT();
+        } else if (fileUrl) {
           audio = audio || Object.assign(new Audio(fileUrl), { loop: true, volume: 0.5 });
           if (playing) audio.play().catch(() => { playing = false; update(); toast('Không phát được nhạc.'); }); else audio.pause();
         } else if (playing) startSynth(); else stopSynth();
