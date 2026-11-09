@@ -789,3 +789,25 @@ body::before { display: none; }
   .process__grid { grid-template-columns: 1fr; gap: 0; }
   .pstep__img { aspect-ratio: auto; width: auto; max-width: 100%; max-height: 72vh; object-fit: contain; margin: 0 auto 22px; background: var(--paper); padding: 8px; border-radius: 16px; }
 }
+
+/* ---------- Thẻ chọn bộ sưu tập có ảnh banner ---------- */
+.col-tabs { gap: 24px; }
+.col-tab--img { flex-direction: column; align-items: stretch; gap: 0; padding: 0; overflow: hidden; border-radius: 24px; }
+.col-tab__img { display: block; aspect-ratio: 2 / 1; overflow: hidden; background: var(--bg-2); }
+.col-tab__img img { width: 100%; height: 100%; object-fit: cover; transition: transform 1.2s var(--ease); }
+.col-tab--img:hover .col-tab__img img { transform: scale(1.04); }
+.col-tab__foot { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 16px 22px; }
+.col-tab:not(.col-tab--img) .col-tab__foot { padding: 0; flex: 1; }
+.col-tab--img .col-tab__text b { font-size: 1.3rem; }
+.col-tab--img:hover .col-tab__count { background: var(--accent); color: #fff; }
+.col-tab__count { transition: background-color .3s, color .3s; }
+
+/* ---------- Con trỏ chuột sáng màu (không dùng hoà trộn tối) ---------- */
+.cursor { mix-blend-mode: normal; background: #ffd27a; border: 2px solid #fff3d6; box-shadow: 0 0 0 1px rgba(224, 165, 38, .45), 0 0 18px 4px rgba(255, 196, 92, .55); width: 14px; height: 14px; margin: -7px 0 0 -7px; }
+.cursor.is-link { width: 44px; height: 44px; margin: -22px 0 0 -22px; background: rgba(255, 214, 128, .28); border: 2px solid #f2b544; box-shadow: 0 0 22px 4px rgba(255, 196, 92, .45); }
+.cursor.is-label { width: 96px; height: 96px; margin: -48px 0 0 -48px; background: linear-gradient(135deg, #ffbe4d, #f0663f); border: 2px solid rgba(255, 255, 255, .85); box-shadow: 0 10px 30px -6px rgba(240, 102, 63, .6); }
+.cursor__label { color: #fff; text-shadow: 0 1px 4px rgba(140, 40, 20, .45); }
+
+@media (max-width: 600px) {
+  .col-tab__foot { flex-direction: column; align-items: flex-start; padding: 14px 16px; gap: 8px; }
+}

@@ -144,17 +144,18 @@
   const collections = () => (S.collections || []).filter((c) => c && (c.title || c.category));
   const colId = (i) => (i === 0 ? 'bo-suu-tap' : 'bst-' + (i + 1));
 
-  const letter = (i) => String.fromCharCode(65 + i);
   const countOf = (c) => P.filter((p) => c.category && p.category === c.category).length;
 
   function collectionsHTML() {
     const cols = collections();
     const tabs = cols.length > 1 ? `<section class="col-tabs-wrap"><div class="container">
       <header class="sec-head sec-head--center"><p class="eyebrow" data-reveal>Hai bộ sưu tập chính</p><h2 class="h2" data-lines>${splitLines('Chọn dòng mành\nbạn yêu thích')}</h2></header>
-      <div class="col-tabs">${cols.map((c, i) => `<a class="col-tab" href="#${colId(i)}" data-reveal>
-        <span class="col-badge">${letter(i)}</span>
-        <span class="col-tab__text"><small>Bộ sưu tập ${letter(i)}</small><b>${h(c.name || c.category)}</b>${c.nameNote ? `<em>${h(c.nameNote)}</em>` : ''}</span>
-        <span class="col-tab__count">${countOf(c) ? countOf(c) + ' mẫu' : 'Đang cập nhật'} →</span>
+      <div class="col-tabs">${cols.map((c, i) => `<a class="col-tab${url(c.image) ? ' col-tab--img' : ''}" href="#${colId(i)}-sp" data-reveal data-cursor="Xem mẫu">
+        ${url(c.image) ? `<span class="col-tab__img"><img src="${url(c.image)}" alt="${h(c.name || c.category)}" loading="lazy"></span>` : ''}
+        <span class="col-tab__foot">
+          <span class="col-tab__text"><b>${h(c.name || c.category)}</b>${c.nameNote ? `<em>${h(c.nameNote)}</em>` : ''}</span>
+          <span class="col-tab__count">${countOf(c) ? countOf(c) + ' mẫu · Xem sản phẩm' : 'Đang cập nhật'} →</span>
+        </span>
       </a>`).join('')}</div>
     </div></section>` : '';
     return tabs + cols.map((c, i) => {
@@ -164,15 +165,15 @@
         let row = list;
         while (row.length < 8) row = row.concat(list); // đủ dài để dải trôi liền mạch
         const group = row.map((p) => cardHTML(p, 'card--feature')).join('');
-        belt = `<div class="belt"><div class="belt__track"><div class="belt__group">${group}</div><div class="belt__group" aria-hidden="true" inert>${group}</div></div></div>`;
+        belt = `<div class="belt" id="${colId(i)}-sp"><div class="belt__track"><div class="belt__group">${group}</div><div class="belt__group" aria-hidden="true" inert>${group}</div></div></div>`;
       } else {
-        belt = `<div class="container"><div class="col-empty" data-reveal><span class="col-empty__icon">🎋</span><p>${h(c.emptyText || 'Mẫu đang được cập nhật.')}</p>
+        belt = `<div class="container" id="${colId(i)}-sp"><div class="col-empty" data-reveal><span class="col-empty__icon">🎋</span><p>${h(c.emptyText || 'Mẫu đang được cập nhật.')}</p>
           <div class="col-empty__btns">${brand.zalo ? `<a class="btn btn--accent" href="${zalo(brand.zalo)}" target="_blank" rel="noopener">Nhắn Zalo xem mẫu</a>` : ''}${brand.phone ? `<a class="btn btn--line" href="${tel(brand.phone)}">Gọi ${h(brand.phone)}</a>` : ''}</div></div></div>`;
       }
       return `<section class="featured featured--${i % 2 ? 'b' : 'a'}" id="${colId(i)}">
         <div class="container featured__head">
           <div class="col-head">
-            <div class="col-head__name" data-reveal><span class="col-badge">${letter(i)}</span><span><small>Bộ sưu tập ${letter(i)}</small><b>${h(c.name || c.category || c.eyebrow)}</b>${c.nameNote ? `<em>(${h(c.nameNote)})</em>` : ''}</span></div>
+            <div class="col-head__name" data-reveal><span><small>Bộ sưu tập</small><b>${h(c.name || c.category || c.eyebrow)}</b>${c.nameNote ? `<em>(${h(c.nameNote)})</em>` : ''}</span></div>
             <h2 class="h2" data-lines>${splitLines(c.title)}</h2>
           </div>
           <div class="featured__aside" data-reveal>
