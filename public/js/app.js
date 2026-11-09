@@ -93,27 +93,24 @@
   function heroHTML() {
     const hs = S.hero || {};
     const slides = hs.slides && hs.slides.length ? hs.slides : [{ title: brand.name }];
-    return `<section class="hero" id="top">
-      <div class="hero__frame"><div class="hero__media">
-        ${slides.map((s, i) => `<div class="hero__slide${i ? '' : ' is-active'}"><img class="hero__bg" src="${url(s.image)}" alt="" ${i ? 'loading="lazy"' : 'fetchpriority="high"'}><img class="hero__art" src="${url(s.image)}" alt="" ${i ? 'loading="lazy"' : ''}></div>`).join('')}
-        <div class="hero__shade"></div>
-      </div></div>
-      <div class="hero__content container">
-        <div class="hero__texts">
-        ${slides.map((s, i) => `<div class="hero__text${i ? '' : ' is-active'}">
-          <p class="eyebrow eyebrow--light"><span class="line"><span class="line__in">${h(s.eyebrow)}</span></span></p>
-          <h1 class="hero__title">${splitLines(s.title)}</h1>
-          <p class="hero__sub">${h(s.subtitle)}</p>
-        </div>`).join('')}
+    // Hero gọn: 1 tiêu đề ngắn + 2 nút, ảnh sản phẩm ghép chiếm phần lớn khung hình
+    const s0 = slides[0];
+    const imgs = slides.map((s) => url(s.image)).filter(Boolean);
+    while (imgs.length && imgs.length < 3) imgs.push(imgs[0]);
+    return `<section class="hero2" id="top">
+      <div class="container hero2__grid">
+        <div class="hero2__text">
+          <p class="eyebrow" data-hero-in>${h(s0.eyebrow)}</p>
+          <h1 class="hero2__title" data-hero-in>${splitLines(s0.title)}</h1>
+          ${s0.subtitle ? `<p class="hero2__sub" data-hero-in>${h(s0.subtitle)}</p>` : ''}
+          <div class="hero2__cta" data-hero-in>
+            <a href="#bo-suu-tap" class="btn btn--accent">${h(hs.ctaPrimary || 'Khám phá')} <span aria-hidden="true">→</span></a>
+            <a href="#dat-hang" class="btn btn--line">${h(hs.ctaSecondary || 'Đặt hàng')}</a>
+          </div>
         </div>
-        <div class="hero__cta">
-          <a href="#bo-suu-tap" class="btn btn--accent">${h(hs.ctaPrimary || 'Khám phá')} <span aria-hidden="true">→</span></a>
-          <a href="#dat-hang" class="btn btn--ghost-light">${h(hs.ctaSecondary || 'Đặt hàng')}</a>
+        <div class="hero2__gallery">
+          ${imgs.slice(0, 3).map((u, i) => `<figure class="hero2__img hero2__img--${i + 1}"><img src="${u}" alt="${h(brand.name)}" ${i ? 'loading="lazy"' : 'fetchpriority="high"'}></figure>`).join('')}
         </div>
-      </div>
-      <div class="hero__ui container">
-        <div class="hero__dots">${slides.length > 1 ? slides.map((_, i) => `<button class="${i ? '' : 'is-active'}" data-i="${i}" aria-label="Banner ${i + 1}"><i>${pad(i + 1)}</i><span></span></button>`).join('') : ''}</div>
-        <div class="hero__scroll"><span>Cuộn để khám phá</span><i></i></div>
       </div>
     </section>`;
   }
@@ -146,6 +143,51 @@
 
   const countOf = (c) => P.filter((p) => c.category && p.category === c.category).length;
 
+  /* ---------------- video giới thiệu (16:9) ---------------- */
+  // Nhận link YouTube / Facebook / Google Drive / Vimeo / TikTok / file .mp4 -> trả về cách nhúng
+  function videoSource(raw) {
+    const u = String(raw || '').trim();
+    if (!u) return null;
+    let m;
+    if ((m = u.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/|embed\/|live\/)|youtu\.be\/)([\w-]{11})/))) {
+      return { type: 'iframe', src: `https://www.youtube-nocookie.com/embed/${m[1]}?autoplay=1&rel=0&playsinline=1`, thumb: `https://i.ytimg.com/vi/${m[1]}/hqdefault.jpg` };
+    }
+    if ((m = u.match(/vimeo\.com\/(?:video\/)?(\d+)/))) return { type: 'iframe', src: `https://player.vimeo.com/video/${m[1]}?autoplay=1` };
+    if ((m = u.match(/drive\.google\.com\/(?:file\/d\/|open\?id=)([\w-]{20,})/))) return { type: 'iframe', src: `https://drive.google.com/file/d/${m[1]}/preview` };
+    if ((m = u.match(/tiktok\.com\/.*\/video\/(\d+)/))) return { type: 'iframe', src: `https://www.tiktok.com/embed/v2/${m[1]}` };
+    if (/facebook\.com|fb\.watch/.test(u)) return { type: 'iframe', src: `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(u)}&show_text=false&autoplay=true` };
+    if (/\.(mp4|webm|ogg)(\?|$)/i.test(u) || /^\/(uploads|img)\//.test(u)) return { type: 'video', src: u };
+    if (/^https:\/\//.test(u)) return { type: 'iframe', src: u };
+    return null;
+  }
+
+  function videoHTML() {
+    const v = S.video || {};
+    if (v.enabled === false) return '';
+    const src = videoSource(v.url);
+    const poster = url(v.poster) || (src && src.thumb) || '';
+    return `<section class="vsec" id="video">
+      <div class="container">
+        ${v.title || v.eyebrow ? `<header class="sec-head sec-head--center"><p class="eyebrow" data-reveal>${h(v.eyebrow)}</p><h2 class="h2" data-lines>${splitLines(v.title)}</h2>${v.subtitle ? `<p class="sec-head__sub" data-reveal>${h(v.subtitle)}</p>` : ''}</header>` : ''}
+        <div class="vbox" data-reveal>
+          ${poster ? `<img class="vbox__poster" src="${poster}" alt="" loading="lazy">` : ''}
+          ${src ? `<button class="vbox__play" data-video-play aria-label="Phát video" data-cursor="Phát"><span class="vbox__btn"><svg viewBox="0 0 24 24" width="30" height="30" fill="currentColor"><path d="M8 5.5v13l11-6.5z"/></svg></span><span class="vbox__label">Xem video</span></button>`
+            : `<div class="vbox__empty"><span>🎬</span><p>Video đang được cập nhật</p></div>`}
+        </div>
+      </div>
+    </section>`;
+  }
+
+  function playVideo(btn) {
+    const box = btn.closest('.vbox');
+    const src = videoSource((S.video || {}).url);
+    if (!box || !src) return;
+    box.classList.add('is-playing');
+    box.innerHTML = src.type === 'video'
+      ? `<video src="${h(src.src)}" controls autoplay playsinline></video>`
+      : `<iframe src="${h(src.src)}" title="Video" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen loading="lazy"></iframe>`;
+  }
+
   function collectionsHTML() {
     const cols = collections();
     const tabs = cols.length > 1 ? `<section class="col-tabs-wrap"><div class="container">
@@ -158,7 +200,7 @@
         </span>
       </a>`).join('')}</div>
     </div></section>` : '';
-    return tabs + cols.map((c, i) => {
+    return tabs + videoHTML() + cols.map((c, i) => {
       const list = P.filter((p) => c.category && p.category === c.category);
       let belt = '';
       if (list.length) {
@@ -620,6 +662,8 @@
 
   function initEvents() {
     document.addEventListener('click', (e) => {
+      const vp = e.target.closest('[data-video-play]');
+      if (vp) { playVideo(vp); return; }
       const open = e.target.closest('[data-open]');
       if (open) { e.preventDefault(); openProduct(open.dataset.open); return; }
       const quick = e.target.closest('[data-quick]');
@@ -881,13 +925,12 @@
 
     const mm = gsap.matchMedia();
 
-    // HERO: khung ảnh co lại thành “màn chiếu”, chữ trôi lên
-    mm.add('(min-width: 0px)', () => {
-      const tl = gsap.timeline({ scrollTrigger: { trigger: '.hero', start: 'top top', end: '+=85%', scrub: 0.8, pin: true, anticipatePin: 1 } });
-      tl.to('.hero__frame', { clipPath: 'inset(9% 5% 9% 5% round 28px)', ease: 'none' }, 0)
-        .to('.hero__media', { scale: 0.92, ease: 'none' }, 0)
-        .to('.hero__content', { yPercent: -35, autoAlpha: 0, ease: 'none' }, 0)
-        .to('.hero__ui', { autoAlpha: 0, ease: 'none' }, 0);
+    // HERO: chữ hiện nhẹ, ảnh ghép trượt vào và trôi chậm khi cuộn
+    gsap.from('[data-hero-in]', { y: 30, autoAlpha: 0, duration: 1.1, ease: 'power3.out', stagger: 0.1, delay: 0.9 });
+    gsap.from('.hero2__img', { y: 60, autoAlpha: 0, duration: 1.3, ease: 'expo.out', stagger: 0.12, delay: 0.8 });
+    mm.add('(min-width: 901px)', () => {
+      gsap.to('.hero2__img--2', { yPercent: -8, ease: 'none', scrollTrigger: { trigger: '.hero2', start: 'top top', end: 'bottom top', scrub: true } });
+      gsap.to('.hero2__img--3', { yPercent: 6, ease: 'none', scrollTrigger: { trigger: '.hero2', start: 'top top', end: 'bottom top', scrub: true } });
     });
 
     // marquee phản ứng theo vận tốc cuộn
@@ -960,7 +1003,7 @@
       setTimeout(() => $('#preloader') && $('#preloader').remove(), 1400);
     };
     const minTime = new Promise((r) => setTimeout(r, reduceMotion ? 0 : 1100));
-    const img = $('.hero__slide img');
+    const img = $('.hero2__img img');
     const imgReady = new Promise((r) => { if (!img || img.complete) r(); else { img.onload = r; img.onerror = r; } });
     Promise.race([Promise.all([minTime, imgReady]), new Promise((r) => setTimeout(r, 3000))]).then(done);
   }

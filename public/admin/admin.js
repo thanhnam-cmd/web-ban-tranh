@@ -396,6 +396,12 @@
         ] },
         T('ctaPrimary', 'Chữ trên nút chính'), T('ctaSecondary', 'Chữ trên nút phụ'),
       ] },
+      { prefix: 'video', title: 'Video giới thiệu (khung ngang 16:9)', desc: 'Hiển thị ngay dưới mục “Chọn dòng mành bạn yêu thích”. Dán link YouTube, Facebook, Google Drive (đã bật chia sẻ “Bất kỳ ai có đường liên kết”), Vimeo, TikTok hoặc link file .mp4. Video chỉ tải khi khách bấm nút phát.', fields: [
+        { k: 'enabled', t: 'toggle', label: 'Hiển thị khối video' },
+        T('url', 'Link video', { wide: true, ph: 'VD: https://www.youtube.com/watch?v=...' }),
+        { k: 'poster', t: 'image', label: 'Ảnh bìa video (ngang 16:9 – để trống thì dùng ảnh của YouTube nếu có)' },
+        T('eyebrow', 'Nhãn nhỏ'), TA('title', 'Tiêu đề (Enter để xuống dòng)', { rows: 2 }), TA('subtitle', 'Mô tả ngắn', { wide: true, rows: 2 }),
+      ] },
       { prefix: 'music', title: 'Nút bật nhạc xuân', desc: 'Để trống link nhạc thì website tự chơi một giai điệu xuân nhẹ nhàng. Muốn dùng bài riêng, dán link file .mp3 (bạn cần có quyền sử dụng bài nhạc đó).', fields: [
         { k: 'enabled', t: 'toggle', label: 'Hiển thị nút nhạc xuân' }, T('label', 'Chữ trên nút'), T('url', 'Link file nhạc .mp3 (tuỳ chọn)', { wide: true }),
       ] },

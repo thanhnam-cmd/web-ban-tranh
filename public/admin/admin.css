@@ -1,8 +1,8 @@
 :root {
-  --bg: #fdf7ee; --panel: #fff; --ink: #2a2230; --muted: #7a6c66; --line: #efe4d6;
-  --accent: #c4553a; --ochre: #d9a23f; --teal: #2f6e6a; --plum: #6e2f4d; --rose: #f6c3b0; --sky: #bfe0ea; --lilac: #e6d3f0;
-  --grad: linear-gradient(120deg, #c4553a, #e0874a);
-  --dark: #2a2230; --ok: #2e8a5f; --err: #d0453a; --r: 16px;
+  --bg: #fbf7ef; --panel: #fff; --ink: #352820; --muted: #786b61; --line: #eadfce;
+  --accent: #4b3328; --ochre: #b88b51; --teal: #8a6a42; --plum: #4b3328; --rose: #efe2cf; --sky: #f2e9dc; --lilac: #e8dbc5;
+  --grad: linear-gradient(120deg, #4b3328, #6b4a37);
+  --dark: #352820; --ok: #2e8a5f; --err: #d0453a; --r: 16px;
   --sans: 'Be Vietnam Pro', system-ui, -apple-system, 'Segoe UI', sans-serif; --serif: 'Cormorant Garamond', Georgia, serif;
 }
 * { box-sizing: border-box; }
